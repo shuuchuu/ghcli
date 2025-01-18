@@ -1,0 +1,33 @@
+[project]
+authors = [
+  {name = "m09", email = "142691+m09@users.noreply.github.com"},
+]
+classifiers = [
+  "License :: OSI Approved :: Apache Software License",
+]
+dependencies = []
+description = "CLI to list and create GitHub issues."
+homepage = "https://github.com/shuuchuu/ghcli"
+name = "ghcli"
+readme = "README.md"
+requires-python = ">= 3.10"
+version = "0.1.0"
+
+[dependency-groups]
+dev = [
+  "mypy >= 1, < 2",
+  "pytest >= 8, < 9",
+  "ruff >= 0.9, < 1",
+]
+
+[tool.ruff]
+target-version = "py310"
+
+[tool.mypy]
+disallow_untyped_defs = true
+ignore_missing_imports = true
+strict_optional = true
+
+[build-system]
+build-backend = "hatchling.build"
+requires = ["hatchling"]
