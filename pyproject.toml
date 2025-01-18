@@ -5,7 +5,10 @@ authors = [
 classifiers = [
   "License :: OSI Approved :: Apache Software License",
 ]
-dependencies = []
+dependencies = [
+  "deal >= 4, < 5",
+  "requests >= 2, < 3",
+]
 description = "CLI to list and create GitHub issues."
 homepage = "https://github.com/shuuchuu/ghcli"
 name = "ghcli"
@@ -18,7 +21,11 @@ dev = [
   "mypy >= 1, < 2",
   "pytest >= 8, < 9",
   "ruff >= 0.9, < 1",
+  "types-requests >= 2, < 3",
 ]
+
+[project.scripts]
+ghcli = "ghcli.cli:main"
 
 [tool.ruff]
 target-version = "py310"
