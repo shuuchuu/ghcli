@@ -2,7 +2,10 @@
 authors = [
   {name = "m09", email = "142691+m09@users.noreply.github.com"},
 ]
-dependencies = []
+dependencies = [
+  "deal >= 4, < 5",
+  "requests >= 2, < 3",
+]
 description = "CLI to list and create GitHub issues."
 homepage = "https://github.com/shuuchuu/ghcli"
 license = "Apache-2.0"
@@ -18,7 +21,11 @@ dev = [
   "pytest >= 8",
   "ruff >= 0.11",
   "ty >= 0.0.33",
+  "types-requests >= 2, < 3",
 ]
+
+[project.scripts]
+ghcli = "ghcli.cli:main"
 
 [tool.ruff]
 target-version = "py312"
