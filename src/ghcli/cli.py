@@ -72,6 +72,6 @@ def main() -> None:
         print(f"{issue.url} - {issue.title} - {issue.body}")
     # Si aucune commande n'a été appelée, on lance l'IHM
     else:
-        from .gui import create_gui
+        from .gradio import gradio
 
-        create_gui()
+        gradio()
