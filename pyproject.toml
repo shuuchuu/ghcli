@@ -4,6 +4,7 @@ authors = [
 ]
 dependencies = [
   "deal >= 4, < 5",
+  "gradio>=5.49.1",
   "requests >= 2, < 3",
 ]
 description = "CLI to list and create GitHub issues."
