@@ -8,13 +8,13 @@ def _add_repo_args(parser: argparse.ArgumentParser) -> None:
     # du tp. L'autre option aurait été d'ajouter ici un argument (même syntaxe mais sans
     # les --). Il aurait alors été obligatoire de fournir une valeur pour appeler GHCLI
     parser.add_argument(
-        "--owner", default="mlambda", help="Owner of the GitHub repository"
+        "--owner", default="shuuchuu", help="Owner of the GitHub repository"
     )
 
     # Ajout de l'option repo avec une valeur par défaut qui pointe vers le dépôt git
     # du tp. L'autre option aurait été d'ajouter ici un argument (même syntaxe mais sans
     # les --). Il aurait alors été obligatoire de fournir une valeur pour appeler GHCLI
-    parser.add_argument("--repo", default="tp-ghcli", help="GitHub repository")
+    parser.add_argument("--repo", default="ghcli", help="GitHub repository")
 
 
 def _create_parser() -> argparse.ArgumentParser:
@@ -72,6 +72,8 @@ def main() -> None:
         print(f"{issue.url} - {issue.title} - {issue.body}")
     # Si aucune commande n'a été appelée, on lance l'IHM
     else:
-        from .gui import create_gui
+        from shiny import run_app
 
-        create_gui()
+        from .gui import app
+
+        run_app(app)  # type: ignore
