@@ -72,8 +72,6 @@ def main() -> None:
         print(f"{issue.url} - {issue.title} - {issue.body}")
     # Si aucune commande n'a été appelée, on lance l'IHM
     else:
-        from shiny import run_app
+        from .gui import create_gui
 
-        from .gui import app
-
-        run_app(app)  # type: ignore
+        create_gui()
