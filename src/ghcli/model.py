@@ -1,5 +1,7 @@
 """Model classes."""
+
 import dataclasses
+import datetime
 import typing
 
 
@@ -13,6 +15,7 @@ class Issue:
     title: str
     body: str
     url: str
+    created_at: datetime.datetime
 
     # L'ajout d'une méthode décorée par @classmethod permet de rendre cette méthode
     # appelable directement sur la classe :
@@ -22,11 +25,18 @@ class Issue:
     #     issue.from_dict(...)
     # C'est très utile ici pour nous permettre de proposer un constructeur alternatif.
     # Le constructeur de base s'utilise de la manière suivante :
-    #     Issue(title="Un titre", body="Un corps", url="https://une-url.com")
+    #     Issue(title="Un titre", body="Un corps", url="https://...", created_at=...)
     # Alors que le constructeur que nous allons proposer ici pourra directement prendre
     # un dictionnaire tel que renvoyé par l'API GitHub et créer une issue à partir de
     # celui-ci.
     @classmethod
-    def from_dict(cls, dct: typing.Dict[str, typing.Any]) -> "Issue":
+    def from_dict(cls, dct: dict[str, typing.Any]) -> "Issue":
         """Construct an issue from a dict such as one returned by GitHub API."""
-        return Issue(title=dct["title"], body=dct["body"], url=dct["html_url"])
+        return Issue(
+            title=dct["title"],
+            body=dct["body"],
+            url=dct["html_url"],
+            created_at=datetime.datetime.fromisoformat(
+                dct["created_at"].replace("Z", "+00:00")
+            ),
+        )
