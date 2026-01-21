@@ -4,7 +4,10 @@ authors = [
 ]
 dependencies = [
   "deal >= 4, < 5",
+  "pandas >= 2, < 3",
+  "plotly >= 5, < 6",
   "requests >= 2, < 3",
+  "shiny >= 1, < 2",
 ]
 description = "CLI to list and create GitHub issues."
 homepage = "https://github.com/shuuchuu/ghcli"
