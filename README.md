@@ -1,4 +1,4 @@
-# Command-Line Interface for GitHub Issues
+# `ghcli`
 
 [Final version on GitHub](https://github.com/shuuchuu/ghcli/tree/main-en).
 

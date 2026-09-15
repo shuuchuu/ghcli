@@ -1,6 +1,9 @@
 __pycache__/
-.mypy_cache/
+.doit.json
+
 .pytest_cache/
 .ruff_cache/
 .venv/
-creds.env
+.vscode/
+dist/
+*.egg-info
