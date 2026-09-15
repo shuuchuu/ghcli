@@ -2,32 +2,35 @@
 authors = [
   {name = "m09", email = "142691+m09@users.noreply.github.com"},
 ]
-classifiers = [
-  "License :: OSI Approved :: Apache Software License",
-]
 dependencies = []
 description = "CLI to list and create GitHub issues."
 homepage = "https://github.com/shuuchuu/ghcli"
+license = "Apache-2.0"
+license-files = ["LICENSE"]
 name = "ghcli"
 readme = "README.md"
-requires-python = ">= 3.10"
+requires-python = ">= 3.12"
 version = "0.1.0"
 
 [dependency-groups]
 dev = [
-  "mypy >= 1, < 2",
-  "pytest >= 8, < 9",
-  "ruff >= 0.9, < 1",
+  "doit >= 0.37",
+  "pytest >= 8",
+  "ruff >= 0.11",
+  "ty >= 0.0.33",
 ]
 
 [tool.ruff]
-target-version = "py310"
+target-version = "py312"
 
-[tool.mypy]
-disallow_untyped_defs = true
-ignore_missing_imports = true
-strict_optional = true
+[tool.ruff.lint]
+ignore = ["D1", "D203", "D213", "RUF067"]
+preview = true
+select = ["A", "B", "C", "D", "DOC", "E", "EM", "F", "I", "N", "PIE", "PTH", "RET", "RUF", "SIM", "SLF", "TC", "UP", "W"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
 
 [build-system]
-build-backend = "hatchling.build"
-requires = ["hatchling"]
+build-backend = "uv_build"
+requires = ["uv_build>=0.11,<0.12.0"]
