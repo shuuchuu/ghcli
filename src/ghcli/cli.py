@@ -16,6 +16,7 @@ def _create_parser() -> argparse.ArgumentParser:
         subparser.add_argument("repo", help="name of the GitHub repository")
     create_parser.add_argument("title", help="title of the issue")
     create_parser.add_argument("body", help="body of the issue")
+    subparsers.add_parser("gui", help="open the graphical interface")
     return parser
 
 
@@ -31,3 +32,8 @@ def main() -> None:
             _show(issue)
     elif args.command == "create":
         _show(create_issue(args.owner, args.repo, args.title, args.body))
+    elif args.command == "gui":
+        # Imported here: the other commands don't need the interface's libraries.
+        from .gui import create_gui
+
+        create_gui()

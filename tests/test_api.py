@@ -1,3 +1,4 @@
+from datetime import UTC, datetime
 from typing import Any
 
 import niquests
@@ -10,6 +11,7 @@ ISSUE = {
     "title": "A title",
     "body": "A body",
     "html_url": "https://github.com/octocat/sandbox/issues/1",
+    "created_at": "2026-10-22T09:30:00Z",
 }
 
 
@@ -52,7 +54,12 @@ def test_list_issues(monkeypatch: pytest.MonkeyPatch) -> None:
 
     monkeypatch.setattr(niquests, "get", get)
     assert list_issues("octocat", "sandbox") == [
-        Issue("A title", "A body", "https://github.com/octocat/sandbox/issues/1")
+        Issue(
+            "A title",
+            "A body",
+            "https://github.com/octocat/sandbox/issues/1",
+            datetime(2026, 10, 22, 9, 30, tzinfo=UTC),
+        )
     ]
     assert calls == [
         ("https://api.github.com/repos/octocat/sandbox/issues", "Bearer a-token")

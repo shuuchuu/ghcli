@@ -1,6 +1,7 @@
 """The issues the CLI handles."""
 
 from dataclasses import dataclass
+from datetime import datetime
 from typing import Any, Self
 
 
@@ -11,6 +12,7 @@ class Issue:
     title: str
     body: str
     url: str
+    created_at: datetime
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> Self:
@@ -23,4 +25,9 @@ class Issue:
             The issue.
         """
         # An issue's body is null when it has none.
-        return cls(title=data["title"], body=data["body"] or "", url=data["html_url"])
+        return cls(
+            title=data["title"],
+            body=data["body"] or "",
+            url=data["html_url"],
+            created_at=datetime.fromisoformat(data["created_at"]),
+        )

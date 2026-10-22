@@ -4,6 +4,8 @@ authors = [
 ]
 dependencies = [
   "niquests >= 3.21, < 4",
+  "plotly >= 6, < 8",
+  "shiny >= 1, < 2",
 ]
 description = "CLI to list and create GitHub issues."
 homepage = "https://github.com/shuuchuu/ghcli"
