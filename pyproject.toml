@@ -3,6 +3,7 @@ authors = [
   {name = "m09", email = "142691+m09@users.noreply.github.com"},
 ]
 dependencies = [
+  "gradio >= 6, < 7",
   "niquests >= 3.21, < 4",
 ]
 description = "CLI to list and create GitHub issues."
