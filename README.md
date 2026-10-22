@@ -1,77 +1,82 @@
-# Interface en ligne de commande pour GitHub Issues
+# Command-line interface for GitHub Issues
 
-*[English version](https://github.com/shuuchuu/ghcli/tree/main-en)*
+*[Version française](https://github.com/shuuchuu/ghcli)*
 
-Le projet des travaux pratiques *Interface en ligne de commande pour GitHub Issues*.
-Leur énoncé est ci-dessous, pour les faire dans un Codespace GitHub ou un clone
-local&nbsp;; c'est le même que celui du notebook des travaux pratiques, en
-[français](https://colab.research.google.com/github/shuuchuu/labs/blob/main/cli-github-issues-cli-hands-on-fr.ipynb)
-ou en
-[anglais](https://colab.research.google.com/github/shuuchuu/labs/blob/main/cli-github-issues-cli-hands-on-en.ipynb),
-qui les fait dans Colab.
+The project of the *Command-line interface for GitHub Issues* lab. Its instructions are
+below, to run the lab in a GitHub Codespace or a local clone; they are the same as the
+lab's notebook, in
+[English](https://colab.research.google.com/github/shuuchuu/labs/blob/main/cli-github-issues-cli-hands-on-en.ipynb)
+or in
+[French](https://colab.research.google.com/github/shuuchuu/labs/blob/main/cli-github-issues-cli-hands-on-fr.ipynb),
+which runs it in Colab.
 
-Le but de ces travaux pratiques est de mettre en pratique les principes d'ingénierie
-vus durant la formation&nbsp;: nous allons créer `ghcli`, une interface en ligne de
-commande qui liste et crée les tickets (*issues*) d'un dépôt GitHub, en faire un paquet
-et le publier sur Test PyPI. Le dépôt est un projet `uv` dont le paquet,
-`src/ghcli/`, est encore vide.
+The aim of this lab is to put into practice the engineering principles seen during the
+course: we are going to create `ghcli`, a command-line interface that lists and creates
+the issues of a GitHub repository, turn it into a package and publish it on Test PyPI.
+The repository is a `uv` project whose package, `src/ghcli/`, is still empty.
 
-## Mise en place de l'environnement de travail
+## Setting up the working environment
 
-Ouvrez le dépôt dans un Codespace&nbsp;: sur GitHub, **Code** > **Codespaces** >
-**Create codespace on main**, ou [ce lien](https://codespaces.new/shuuchuu/ghcli). Le
-Codespace installe les dépendances à sa création, dans le `.venv` du projet.
+This English version of the lab is the repository's `main-en` branch. Open it in a
+Codespace: on GitHub, on the `main-en` branch, **Code** > **Codespaces** > **Create
+codespace on main-en**, or [this
+link](https://codespaces.new/shuuchuu/ghcli/tree/main-en). The Codespace installs the
+dependencies when it is created, in the project's `.venv`.
 
-Dans un clone local, installez
-[uv](https://docs.astral.sh/uv/getting-started/installation/), puis lancez `uv sync` à
-la racine du dépôt.
+In a local clone of that branch, install
+[uv](https://docs.astral.sh/uv/getting-started/installation/), then run `uv sync` at the
+root of the repository:
 
-Les commandes ci-dessous se lancent dans un terminal à la racine du dépôt (**Terminal** >
-**Nouveau terminal** dans le Codespace), avec `uv run`, qui les exécute dans
-l'environnement du projet. Les fichiers s'écrivent dans l'éditeur. Les solutions sont
-aussi sur la [branche `solution`](https://github.com/shuuchuu/ghcli/tree/solution) du
-dépôt.
+```console
+git clone -b main-en https://github.com/shuuchuu/ghcli.git
+cd ghcli
+uv sync
+```
 
-## Un dépôt de test et un jeton GitHub
+The commands below run in a terminal at the root of the repository (**Terminal** > **New
+Terminal** in the Codespace), through `uv run`, which runs them in the project's
+environment. The files are written in the editor. The solutions are also on the
+repository's [`solution-en` branch](https://github.com/shuuchuu/ghcli/tree/solution-en).
 
-`ghcli` crée des tickets&nbsp;: il lui faut un dépôt où les créer, et un jeton
-d'accès à l'API de GitHub qui n'autorise que cela.
+## A test repository and a GitHub token
 
-1. Si vous n'avez pas encore de compte GitHub, [créez-en un](https://github.com/signup),
-   puis identifiez-vous.
-2. [Créez un dépôt](https://github.com/new) public nommé `ghcli-sandbox`, avec un
+`ghcli` creates issues: it needs a repository to create them in, and a token for the
+GitHub API that allows only that.
+
+1. If you don't have a GitHub account yet, [create one](https://github.com/signup),
+   then sign in.
+2. [Create a public repository](https://github.com/new) named `ghcli-sandbox`, with a
    README (**Add README**).
-3. [Créez un jeton](https://github.com/settings/personal-access-tokens/new)
-   (*fine-grained personal access token*)&nbsp;: **Token name** `GHCLI`, **Expiration**
-   7 jours, **Repository access** > **Only select repositories** > `ghcli-sandbox`,
-   puis, dans **Permissions**, **Add permissions** > **Issues**, en **Read and write**.
-   Copiez sa valeur, qui commence par `github_pat_`&nbsp;: GitHub ne l'affiche qu'une
-   fois.
-4. Créez à la racine du dépôt un fichier `creds.env` (que `.gitignore` exclut des
-   commits) qui contient&nbsp;:
+3. [Create a token](https://github.com/settings/personal-access-tokens/new) (a
+   *fine-grained personal access token*): **Token name** `GHCLI`, **Expiration** 7
+   days, **Repository access** > **Only select repositories** > `ghcli-sandbox`, then,
+   under **Permissions**, **Add permissions** > **Issues**, as **Read and write**. Copy
+   its value, which starts with `github_pat_`: GitHub shows it only once.
+4. At the root of the repository, create a `creds.env` file (which `.gitignore` keeps
+   out of commits) holding:
 
    ```shell
    export GHCLI_TOKEN=github_pat_...
    ```
 
-   et lancez `source creds.env` dans chaque nouveau terminal, avant `ghcli`.
+   and run `source creds.env` in every new terminal, before `ghcli`.
 
-## Un point d'entrée
+## An entry point
 
-Créez le module `src/ghcli/cli.py`, avec une fonction `main`, sans argument, qui
-affiche `Hello World`. Déclarez dans `pyproject.toml` la commande `ghcli`, qui lance
-cette fonction, puis lancez `uv sync`, qui l'installe dans l'environnement du projet,
-et essayez-la&nbsp;: `uv run ghcli`.
+Create the `src/ghcli/cli.py` module, with a `main` function, taking no argument, that
+prints `Hello World`. Declare in `pyproject.toml` the `ghcli` command, which runs that
+function, then run `uv sync`, which installs it in the project's environment, and try
+it: `uv run ghcli`.
 
-**Documentation utile**
+**Useful documentation**
 
 - https://docs.astral.sh/uv/concepts/projects/config/#entry-points
 
 <details>
-<summary>Conseils supplémentaires</summary>
+<summary>Additional hints</summary>
 
-Une commande se déclare dans la table `[project.scripts]`&nbsp;: son nom, puis le
-module et la fonction qu'elle appelle, séparés par `:`.
+A command is declared in the `[project.scripts]` table: its name, then the module and
+the function it calls, separated by `:`.
 
 ```toml
 [project.scripts]
@@ -83,7 +88,7 @@ ghcli = "ghcli....:..."
 <details>
 <summary>Solution</summary>
 
-`src/ghcli/cli.py`&nbsp;:
+`src/ghcli/cli.py`:
 
 ```python
 """Command-line interface to GitHub issues."""
@@ -94,7 +99,7 @@ def main() -> None:
     print("Hello World")
 ```
 
-`pyproject.toml`, à la suite de la table `[project]`&nbsp;:
+`pyproject.toml`, after the `[project]` table:
 
 ```toml
 [project.scripts]
@@ -108,24 +113,24 @@ uv run ghcli
 
 </details>
 
-## Un parseur d'arguments
+## An argument parser
 
-Modifiez `main` pour qu'elle lise deux arguments de la ligne de commande, le
-propriétaire d'un dépôt GitHub et son nom, et qu'elle les affiche&nbsp;: `uv run ghcli
-octocat Hello-World` affiche `octocat Hello-World`. Que donnent `uv run ghcli`, sans
-argument, et `uv run ghcli --help`&nbsp;?
+Change `main` so that it reads two arguments from the command line, the owner of a
+GitHub repository and its name, and prints them: `uv run ghcli octocat Hello-World`
+prints `octocat Hello-World`. What do `uv run ghcli`, with no argument, and `uv run
+ghcli --help` give?
 
-**Documentation utile**
+**Useful documentation**
 
-- https://docs.python.org/fr/3/library/argparse.html#the-add-argument-method
+- https://docs.python.org/3/library/argparse.html#the-add-argument-method
 
 <details>
-<summary>Conseils supplémentaires</summary>
+<summary>Additional hints</summary>
 
-Un argument positionnel est un nom sans tirets&nbsp;: `parser.add_argument("owner",
-help="...")`. `parse_args()` renvoie un objet dont chaque argument est un attribut
-(`args.owner`). Sans argument, `argparse` affiche l'usage et une erreur&nbsp;; avec
-`--help`, l'aide qu'il génère des `help=`.
+A positional argument is a name without dashes: `parser.add_argument("owner",
+help="...")`. `parse_args()` returns an object with each argument as an attribute
+(`args.owner`). With no argument, `argparse` prints the usage and an error; with
+`--help`, the help it generates from the `help=` strings.
 
 ```python
 import argparse
@@ -144,7 +149,7 @@ def main() -> None:
 <details>
 <summary>Solution</summary>
 
-`src/ghcli/cli.py`&nbsp;:
+`src/ghcli/cli.py`:
 
 ```python
 """Command-line interface to GitHub issues."""
@@ -168,18 +173,18 @@ uv run ghcli --help
 
 </details>
 
-## Une fonction pour la logique
+## A function for the logic
 
-Créez un module `src/ghcli/api.py`, qui contiendra la logique du logiciel&nbsp;: les
-appels à l'API de GitHub. Écrivez-y pour l'instant une fonction `list_issues(owner:
-str, repo: str) -> None` qui affiche ses arguments, et faites appeler `list_issues` par
-`main`, avec les arguments qu'elle a lus. `cli.py` ne garde que la lecture des
-arguments.
+Create a `src/ghcli/api.py` module, which will hold the software's logic: the calls to
+the GitHub API. For now, write in it a `list_issues(owner: str, repo: str) -> None`
+function that prints its arguments, and have `main` call `list_issues` with the
+arguments it read. `cli.py` keeps only the reading of the arguments.
 
 <details>
-<summary>Conseils supplémentaires</summary>
+<summary>Additional hints</summary>
 
-Dans le paquet, `from .api import list_issues` importe la fonction du module voisin.
+Inside the package, `from .api import list_issues` imports the function from the
+neighboring module.
 
 ```python
 from .api import list_issues
@@ -195,7 +200,7 @@ def main() -> None:
 <details>
 <summary>Solution</summary>
 
-`src/ghcli/api.py`&nbsp;:
+`src/ghcli/api.py`:
 
 ```python
 """Calls to the GitHub API."""
@@ -211,7 +216,7 @@ def list_issues(owner: str, repo: str) -> None:
     print(owner, repo)
 ```
 
-`src/ghcli/cli.py`&nbsp;:
+`src/ghcli/cli.py`:
 
 ```python
 """Command-line interface to GitHub issues."""
@@ -232,32 +237,30 @@ def main() -> None:
 
 </details>
 
-## Le jeton, depuis une variable d'environnement
+## The token, from an environment variable
 
-Écrivez dans `api.py` une fonction `_get_token() -> str` qui renvoie la valeur de la
-variable d'environnement `GHCLI_TOKEN`. Quand elle n'est pas définie, la fonction
-affiche sur la sortie d'erreur ce message, puis arrête le programme avec le code de
-retour `1`&nbsp;:
+Write in `api.py` a `_get_token() -> str` function that returns the value of the
+`GHCLI_TOKEN` environment variable. When it isn't defined, the function prints this
+message to the standard error, then stops the program with the exit code `1`:
 
 ```text
 Unable to read the GitHub token from the GHCLI_TOKEN environment variable. Define it and
 run the program again.
 ```
 
-Essayez-la avec `uv run python -c "from ghcli.api import _get_token;
-print(_get_token())"`, dans un terminal où vous avez lancé `source creds.env`, puis
-dans un nouveau terminal.
+Try it with `uv run python -c "from ghcli.api import _get_token; print(_get_token())"`,
+in a terminal where you ran `source creds.env`, then in a new terminal.
 
-**Documentation utile**
+**Useful documentation**
 
-- https://docs.python.org/fr/3/library/os.html#os.environ
-- https://docs.python.org/fr/3/library/sys.html#sys.exit
+- https://docs.python.org/3/library/os.html#os.environ
+- https://docs.python.org/3/library/sys.html#sys.exit
 
 <details>
-<summary>Conseils supplémentaires</summary>
+<summary>Additional hints</summary>
 
-`os.environ` est un dictionnaire des variables d'environnement&nbsp;: une clé absente
-lève une `KeyError`. `print(..., file=sys.stderr)` écrit sur la sortie d'erreur.
+`os.environ` is a dictionary of the environment variables: a missing key raises a
+`KeyError`. `print(..., file=sys.stderr)` writes to the standard error.
 
 ```python
 import os
@@ -277,7 +280,7 @@ def _get_token() -> str:
 <details>
 <summary>Solution</summary>
 
-`src/ghcli/api.py`&nbsp;:
+`src/ghcli/api.py`:
 
 ```python
 """Calls to the GitHub API."""
@@ -315,14 +318,13 @@ uv run python -c "from ghcli.api import _get_token; print(_get_token())"
 
 </details>
 
-## Lister les tickets
+## Listing the issues
 
-Ajoutez au projet la bibliothèque [`niquests`](https://niquests.readthedocs.io/), qui a
-l'interface de `requests`, en plus moderne (`uv add niquests`). Faites ensuite de
-`list_issues` une fonction qui renvoie les tickets ouverts du dépôt, une liste de
-n-uplets `(titre, corps, url)`&nbsp;: sa signature devient `list_issues(owner: str,
-repo: str) -> list[tuple[str, str, str]]`. Elle demande ces tickets à l'API de
-GitHub&nbsp;:
+Add the [`niquests`](https://niquests.readthedocs.io/) library to the project, which
+has `requests`'s interface, in a more modern form (`uv add niquests`). Then turn
+`list_issues` into a function that returns the repository's open issues, a list of
+`(title, body, url)` tuples: its signature becomes `list_issues(owner: str, repo: str)
+-> list[tuple[str, str, str]]`. It asks the GitHub API for these issues:
 
 ```python
 response = niquests.get(
@@ -335,25 +337,24 @@ response = niquests.get(
 )
 ```
 
-puis lit la réponse, la liste des tickets en JSON&nbsp;: `response.json()`. Faites
-afficher à `main` une ligne par ticket, `url - titre - corps`, et essayez&nbsp;: `uv
-run ghcli <votre utilisateur> ghcli-sandbox`, qui n'en a pas encore, puis `uv run ghcli
-octocat Hello-World`. Que se passe-t-il pour un dépôt qui n'existe pas&nbsp;?
+then reads the response, the list of issues as JSON: `response.json()`. Have `main`
+print one line per issue, `url - title - body`, and try it: `uv run ghcli <your user>
+ghcli-sandbox`, which has none yet, then `uv run ghcli octocat Hello-World`. What
+happens for a repository that doesn't exist?
 
-**Documentation utile**
+**Useful documentation**
 
 - https://docs.github.com/en/rest/issues/issues#list-repository-issues
 - https://niquests.readthedocs.io/en/latest/user/quickstart.html#response-status-codes
 
 <details>
-<summary>Conseils supplémentaires</summary>
+<summary>Additional hints</summary>
 
-Chaque ticket est un dictionnaire, dont les clés `title`, `body` et `html_url` (l'URL
-de sa page, quand `url` est celle de l'API) donnent ce qu'on veut&nbsp;; `body` vaut
-`None` pour un ticket sans corps. `response.raise_for_status()` lève une
-`niquests.HTTPError` quand l'API répond par une erreur, `404` pour un dépôt inconnu,
-`401` pour un jeton invalide. L'API liste aussi les *pull requests*, qui sont des
-tickets pour elle.
+Each issue is a dictionary whose `title`, `body` and `html_url` keys (the URL of its
+page, whereas `url` is the API's) give what we want; `body` is `None` for an issue
+without a body. `response.raise_for_status()` raises a `niquests.HTTPError` when the API
+answers with an error, `404` for an unknown repository, `401` for an invalid token. The
+API also lists the pull requests, which are issues to it.
 
 ```python
 def list_issues(owner: str, repo: str) -> list[tuple[str, str, str]]:
@@ -367,7 +368,7 @@ def list_issues(owner: str, repo: str) -> list[tuple[str, str, str]]:
 <details>
 <summary>Solution</summary>
 
-`src/ghcli/api.py`&nbsp;:
+`src/ghcli/api.py`:
 
 ```python
 """Calls to the GitHub API."""
@@ -423,7 +424,7 @@ def list_issues(owner: str, repo: str) -> list[tuple[str, str, str]]:
     ]
 ```
 
-`src/ghcli/cli.py`&nbsp;:
+`src/ghcli/cli.py`:
 
 ```python
 """Command-line interface to GitHub issues."""
@@ -448,16 +449,16 @@ uv add niquests
 uv run ghcli octocat Hello-World
 ```
 
-Pour un dépôt inconnu, `raise_for_status` lève une `niquests.HTTPError` (`404 Client
+For an unknown repository, `raise_for_status` raises a `niquests.HTTPError` (`404 Client
 Error: Not Found`).
 
 </details>
 
-## Créer un ticket&nbsp;: deux commandes
+## Creating an issue: two commands
 
-Ajoutez à `api.py` une fonction `create_issue(owner: str, repo: str, title: str, body:
-str) -> tuple[str, str, str]`, qui crée un ticket et renvoie son titre, son corps et
-son URL. Elle envoie à l'API le titre et le corps du ticket, en JSON&nbsp;:
+Add to `api.py` a `create_issue(owner: str, repo: str, title: str, body: str) ->
+tuple[str, str, str]` function, which creates an issue and returns its title, body and
+URL. It sends the issue's title and body to the API, as JSON:
 
 ```python
 response = niquests.post(
@@ -468,24 +469,23 @@ response = niquests.post(
 )
 ```
 
-`ghcli` a maintenant deux commandes, `ghcli list <propriétaire> <dépôt>` et `ghcli
-create <propriétaire> <dépôt> <titre> <corps>`&nbsp;: faites-en deux sous-commandes du
-parseur, chacune avec ses arguments. Créez un ticket dans votre dépôt de test, puis
-listez-le.
+`ghcli` now has two commands, `ghcli list <owner> <repository>` and `ghcli create
+<owner> <repository> <title> <body>`: make them two subcommands of the parser, each with
+its arguments. Create an issue in your test repository, then list it.
 
-**Documentation utile**
+**Useful documentation**
 
 - https://docs.github.com/en/rest/issues/issues#create-an-issue
-- https://docs.python.org/fr/3/library/argparse.html#subcommands
+- https://docs.python.org/3/library/argparse.html#subcommands
 
 <details>
-<summary>Conseils supplémentaires</summary>
+<summary>Additional hints</summary>
 
-`parser.add_subparsers(dest="command", required=True)` renvoie un objet dont
-`add_parser("list")` crée le parseur de la sous-commande&nbsp;; `args.command` dit
-laquelle a été lancée. Les deux sous-commandes ont `owner` et `repo` en commun&nbsp;:
-une boucle les leur ajoute. L'API répond `201 Created` avec le ticket créé, au même
-format qu'un ticket de la liste.
+`parser.add_subparsers(dest="command", required=True)` returns an object whose
+`add_parser("list")` creates the subcommand's parser; `args.command` says which one
+ran. Both subcommands share `owner` and `repo`: a loop adds them to both. The API
+answers `201 Created` with the created issue, in the same format as an issue of the
+list.
 
 ```python
 subparsers = parser.add_subparsers(dest="command", required=True)
@@ -508,7 +508,7 @@ elif args.command == "create":
 <details>
 <summary>Solution</summary>
 
-`src/ghcli/api.py`, à la suite de `list_issues`&nbsp;:
+`src/ghcli/api.py`, after `list_issues`:
 
 ```python
 def create_issue(owner: str, repo: str, title: str, body: str) -> tuple[str, str, str]:
@@ -535,7 +535,7 @@ def create_issue(owner: str, repo: str, title: str, body: str) -> tuple[str, str
     return issue["title"], issue["body"] or "", issue["html_url"]
 ```
 
-`src/ghcli/cli.py`&nbsp;:
+`src/ghcli/cli.py`:
 
 ```python
 """Command-line interface to GitHub issues."""
@@ -570,33 +570,31 @@ def main() -> None:
 ```
 
 ```console
-uv run ghcli create <votre utilisateur> ghcli-sandbox "Premier ticket" "Créé par ghcli"
-uv run ghcli list <votre utilisateur> ghcli-sandbox
+uv run ghcli create <your user> ghcli-sandbox "First issue" "Created by ghcli"
+uv run ghcli list <your user> ghcli-sandbox
 ```
 
 </details>
 
-## Une classe pour les tickets
+## A class for the issues
 
-Des n-uplets représentent pour l'instant les tickets&nbsp;: il est facile d'en
-confondre l'ordre, et d'introduire ainsi des bugs. Créez dans un module
-`src/ghcli/model.py` une classe `Issue`, avec le module `dataclasses`, dont les
-attributs sont le titre, le corps et l'URL d'un ticket, et une méthode de classe
-`from_dict` qui construit un `Issue` à partir d'un ticket de l'API. `list_issues`
-renvoie alors une `list[Issue]`, `create_issue` un `Issue`&nbsp;: adaptez-les, ainsi
-que `cli.py`.
+Tuples represent the issues for now: it's easy to mix up their order, and so to
+introduce bugs. In a `src/ghcli/model.py` module, create an `Issue` class, with the
+`dataclasses` module, whose attributes are an issue's title, body and URL, and a
+`from_dict` class method that builds an `Issue` from an issue of the API. `list_issues`
+then returns a `list[Issue]`, `create_issue` an `Issue`: adapt them, and `cli.py` too.
 
-**Documentation utile**
+**Useful documentation**
 
-- https://docs.python.org/fr/3/library/dataclasses.html
-- https://docs.python.org/fr/3/library/functions.html#classmethod
+- https://docs.python.org/3/library/dataclasses.html
+- https://docs.python.org/3/library/functions.html#classmethod
 
 <details>
-<summary>Conseils supplémentaires</summary>
+<summary>Additional hints</summary>
 
-`@dataclass` génère le constructeur, la représentation et la comparaison à partir des
-attributs annotés. Une méthode de classe reçoit la classe (`cls`) au lieu d'une
-instance&nbsp;: c'est un autre constructeur, `Issue.from_dict(issue)`.
+`@dataclass` generates the constructor, the representation and the comparison from the
+annotated attributes. A class method receives the class (`cls`) instead of an instance:
+it's another constructor, `Issue.from_dict(issue)`.
 
 ```python
 from dataclasses import dataclass
@@ -618,7 +616,7 @@ class Issue:
 <details>
 <summary>Solution</summary>
 
-`src/ghcli/model.py`&nbsp;:
+`src/ghcli/model.py`:
 
 ```python
 """The issues the CLI handles."""
@@ -649,7 +647,7 @@ class Issue:
         return cls(title=data["title"], body=data["body"] or "", url=data["html_url"])
 ```
 
-`src/ghcli/api.py`&nbsp;:
+`src/ghcli/api.py`:
 
 ```python
 """Calls to the GitHub API."""
@@ -726,7 +724,7 @@ def create_issue(owner: str, repo: str, title: str, body: str) -> Issue:
     return Issue.from_dict(response.json())
 ```
 
-`src/ghcli/cli.py`&nbsp;:
+`src/ghcli/cli.py`:
 
 ```python
 """Command-line interface to GitHub issues."""
@@ -766,28 +764,27 @@ def main() -> None:
 
 </details>
 
-## Des tests
+## Tests
 
-Écrivez dans `tests/test_api.py` des tests de `_get_token`, `list_issues` et
-`create_issue`, et lancez-les avec `uv run pytest`. Ils ne doivent dépendre ni du
-réseau, ni de votre jeton&nbsp;: remplacez `niquests.get` et `niquests.post` par des
-fonctions qui renvoient une fausse réponse, et la variable d'environnement par une
-valeur de test. Vérifiez aussi les cas d'erreur&nbsp;: une variable absente, un dépôt
-inconnu.
+Write in `tests/test_api.py` tests of `_get_token`, `list_issues` and `create_issue`,
+and run them with `uv run pytest`. They must depend neither on the network nor on your
+token: replace `niquests.get` and `niquests.post` with functions that return a fake
+response, and the environment variable with a test value. Also check the error cases: a
+missing variable, an unknown repository.
 
-**Documentation utile**
+**Useful documentation**
 
 - https://docs.pytest.org/en/stable/how-to/monkeypatch.html
 - https://docs.pytest.org/en/stable/how-to/assert.html#assertions-about-expected-exceptions
 
 <details>
-<summary>Conseils supplémentaires</summary>
+<summary>Additional hints</summary>
 
-La fixture `monkeypatch` de `pytest` remplace un attribut le temps d'un test
-(`monkeypatch.setattr(niquests, "get", fake_get)`) et définit ou retire une variable
-d'environnement (`setenv`, `delenv`). Une fausse réponse n'a besoin que des méthodes
-qu'appelle le code&nbsp;: `raise_for_status` et `json`. Une fixture
-`autouse=True` s'applique à tous les tests du module.
+`pytest`'s `monkeypatch` fixture replaces an attribute for the duration of a test
+(`monkeypatch.setattr(niquests, "get", fake_get)`) and sets or removes an environment
+variable (`setenv`, `delenv`). A fake response only needs the methods the code calls:
+`raise_for_status` and `json`. An `autouse=True` fixture applies to every test of the
+module.
 
 ```python
 class FakeResponse:
@@ -814,7 +811,7 @@ def test_list_issues(monkeypatch):
 <details>
 <summary>Solution</summary>
 
-`tests/test_api.py`&nbsp;:
+`tests/test_api.py`:
 
 ```python
 from typing import Any
@@ -900,41 +897,42 @@ uv run pytest
 
 </details>
 
-## Publication sur Test PyPI
+## Publishing on Test PyPI
 
-Tout semble prêt pour une première version. Publiez votre paquet sur Test PyPI, l'index
-de test de PyPI&nbsp;:
+Everything seems ready for a first release. Publish your package on Test PyPI, PyPI's
+test index:
 
-1. Le nom `ghcli` ne peut être publié qu'une fois&nbsp;: dans `pyproject.toml`,
-   renommez le projet `ghcli-<votre utilisateur GitHub>`, en minuscules, sans changer
-   le nom du paquet qu'on importe, `ghcli`.
-2. Déclarez dans `pyproject.toml` l'index `testpypi`, son URL et celle où l'on publie.
-3. [Créez un compte](https://test.pypi.org/account/register/) sur Test PyPI (il
-   demande une authentification à deux facteurs), puis [un jeton
-   d'API](https://test.pypi.org/manage/account/token/), pour tout le compte.
-4. Construisez le paquet avec `uv build`, puis publiez-le avec `uv publish --index
-   testpypi --token <votre jeton>`.
-5. Trouvez sa page sur Test PyPI, puis installez-le et lancez-le, sans le dépôt&nbsp;:
-   `uvx --index https://pypi.org/simple/ --default-index https://test.pypi.org/simple/
-   --from ghcli-<votre utilisateur> ghcli --help`.
+1. The name `ghcli` can be published only once: in `pyproject.toml`, rename the project
+   `ghcli-<your GitHub user>`, in lowercase, without changing the name of the package
+   one imports, `ghcli`.
+2. Declare in `pyproject.toml` the `testpypi` index, its URL and the one packages are
+   published to.
+3. [Create an account](https://test.pypi.org/account/register/) on Test PyPI (it asks
+   for two-factor authentication), then [an API
+   token](https://test.pypi.org/manage/account/token/), for the whole account.
+4. Build the package with `uv build`, then publish it with `uv publish --index testpypi
+   --token <your token>`.
+5. Find its page on Test PyPI, then install and run it, without the repository: `uvx
+   --index https://pypi.org/simple/ --default-index https://test.pypi.org/simple/ --from
+   ghcli-<your user> ghcli --help`.
 
-**Documentation utile**
+**Useful documentation**
 
 - https://docs.astral.sh/uv/concepts/build-backend/#modules
 - https://docs.astral.sh/uv/guides/integration/alternative-indexes/
 - https://docs.astral.sh/uv/guides/package/#publishing-your-package
 
 <details>
-<summary>Conseils supplémentaires</summary>
+<summary>Additional hints</summary>
 
-Le module que construit `uv build` porte par défaut le nom du projet&nbsp;: `module-name`,
-dans `[tool.uv.build-backend]`, le fixe. Un index se déclare dans une table
-`[[tool.uv.index]]`&nbsp;: `name`, `url`, `publish-url`, et `explicit = true`, pour que
-`uv` n'y cherche que les paquets qu'on lui attribue. L'URL de Test PyPI est
-`https://test.pypi.org/simple/`, celle où l'on publie `https://test.pypi.org/legacy/`.
-Pour `uvx`, PyPI passe avant Test PyPI&nbsp;: `uv` prend chaque paquet sur le premier
-index qui l'a, donc `niquests` et ses dépendances sur PyPI, aux versions à jour, et
-votre paquet, qui n'existe que sur Test PyPI, sur ce dernier.
+The module `uv build` builds is named after the project by default: `module-name`, in
+`[tool.uv.build-backend]`, sets it. An index is declared in a `[[tool.uv.index]]` table:
+`name`, `url`, `publish-url`, and `explicit = true`, so that `uv` only looks there for
+the packages assigned to it. Test PyPI's URL is `https://test.pypi.org/simple/`, the one
+packages are published to `https://test.pypi.org/legacy/`. For `uvx`, PyPI comes before
+Test PyPI: `uv` takes each package from the first index that has it, so `niquests` and
+its dependencies from PyPI, at their current versions, and your package, which only
+exists on Test PyPI, from the latter.
 
 ```toml
 [project]
@@ -955,7 +953,7 @@ explicit = true
 <details>
 <summary>Solution</summary>
 
-`pyproject.toml`, ici pour l'utilisateur `octocat`&nbsp;:
+`pyproject.toml`, here for the user `octocat`:
 
 ```toml
 [project]
@@ -974,10 +972,10 @@ explicit = true
 
 ```console
 uv build
-uv publish --index testpypi --token <votre jeton>
-uvx --index https://pypi.org/simple/ --default-index https://test.pypi.org/simple/ --from ghcli-<votre utilisateur> ghcli --help
+uv publish --index testpypi --token <your token>
+uvx --index https://pypi.org/simple/ --default-index https://test.pypi.org/simple/ --from ghcli-<your user> ghcli --help
 ```
 
-La page du paquet est `https://test.pypi.org/project/ghcli-<votre utilisateur>/`.
+The package's page is `https://test.pypi.org/project/ghcli-<your user>/`.
 
 </details>
