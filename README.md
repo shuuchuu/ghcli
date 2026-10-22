@@ -1,72 +1,71 @@
-# Interface graphique Tkinter pour GitHub Issues
+# Tkinter graphical interface for GitHub Issues
 
-*[English version](https://github.com/shuuchuu/ghcli/tree/gui-en)*
+*[Version française](https://github.com/shuuchuu/ghcli/tree/gui)*
 
-Le projet des travaux pratiques *Interface graphique Tkinter pour GitHub Issues*. Ils
-partent de la solution des travaux pratiques [*Interface en ligne de commande pour
-GitHub Issues*](https://github.com/shuuchuu/ghcli)&nbsp;: `ghcli list` et `ghcli
-create` listent et créent les tickets d'un dépôt, et sont testés. Nous allons leur
-ajouter une interface graphique, avec Tkinter. Leur énoncé est ci-dessous, pour les
-faire dans un Codespace GitHub ou un clone local (Colab n'affiche pas de fenêtres).
+The project of the *Tkinter graphical interface for GitHub Issues* lab. It starts from
+the solution of the [*Command-line interface for GitHub
+Issues*](https://github.com/shuuchuu/ghcli/tree/main-en) lab: `ghcli list` and `ghcli
+create` list and create a repository's issues, and are tested. We are going to add a
+graphical interface to them, with Tkinter. Its instructions are below, to run the lab in
+a GitHub Codespace or a local clone (Colab shows no windows).
 
-Le projet contient pour cela&nbsp;:
+For that, the project holds:
 
-- `src/ghcli/gui.py`, l'interface à compléter&nbsp;: `create_gui` ouvre la fenêtre
-  principale, dont les deux boutons ouvrent chacun une fenêtre, vide pour l'instant.
-  `_window` ouvre une fenêtre et renvoie le cadre où placer ses widgets, `_entry`
-  ajoute à un cadre une ligne de formulaire, un libellé et une zone de saisie&nbsp;;
-- `src/ghcli/io.py`, dont `save_issues_to_file` enregistre des tickets dans un fichier
-  JSON&nbsp;;
-- la commande `ghcli gui`, qui lance l'interface.
+- `src/ghcli/gui.py`, the interface to complete: `create_gui` opens the main window,
+  whose two buttons each open a window, empty for now. `_window` opens a window and
+  returns the frame to lay out its widgets in, `_entry` adds a form row to a frame, a
+  label and an entry;
+- `src/ghcli/io.py`, whose `save_issues_to_file` saves issues to a JSON file;
+- the `ghcli gui` command, which starts the interface.
 
-## Mise en place de l'environnement de travail
+## Setting up the working environment
 
-Ouvrez le dépôt dans un Codespace, sur sa branche `gui`&nbsp;: sur GitHub, sur la
-branche `gui`, **Code** > **Codespaces** > **Create codespace on gui**, ou [ce
-lien](https://codespaces.new/shuuchuu/ghcli/tree/gui). Le Codespace installe les
-dépendances à sa création, dans le `.venv` du projet, et un bureau, où s'affichent
-les fenêtres&nbsp;: dans l'onglet **Ports**, à côté du terminal, survolez la ligne du
-port 6080 (*Bureau / Desktop*), cliquez sur l'icône du globe (**Open in Browser**),
-puis sur **Connect**.
+This English version of the lab is the repository's `gui-en` branch. Open it in a
+Codespace: on GitHub, on the `gui-en` branch, **Code** > **Codespaces** > **Create
+codespace on gui-en**, or [this
+link](https://codespaces.new/shuuchuu/ghcli/tree/gui-en). The Codespace installs the
+dependencies when it is created, in the project's `.venv`, and a desktop, where the
+windows show: in the **Ports** tab, next to the terminal, hover over the line of port
+6080 (*Bureau / Desktop*), click the globe icon (**Open in Browser**), then
+**Connect**.
 
-Dans un clone local de cette branche (`git clone -b gui
-https://github.com/shuuchuu/ghcli.git`), installez
-[uv](https://docs.astral.sh/uv/getting-started/installation/), puis lancez `uv sync` à
-la racine du dépôt&nbsp;: le Python que `uv` installe contient Tkinter.
+In a local clone of that branch (`git clone -b gui-en
+https://github.com/shuuchuu/ghcli.git`), install
+[uv](https://docs.astral.sh/uv/getting-started/installation/), then run `uv sync` at the
+root of the repository: the Python `uv` installs includes Tkinter.
 
-`ghcli` a besoin d'un jeton GitHub&nbsp;: si vous n'en avez pas, créez un dépôt de test
-et un jeton comme l'explique [l'énoncé de l'interface en ligne de
-commande](https://github.com/shuuchuu/ghcli#un-dépôt-de-test-et-un-jeton-github), et
-mettez-le dans un fichier `creds.env` à la racine du dépôt. Les commandes se lancent
-dans un terminal à la racine du dépôt (**Terminal** > **Nouveau terminal** dans le
-Codespace), après `source creds.env`. Lancez l'interface avec `uv run ghcli gui`, et
-fermez-la (la fenêtre principale) avant de la relancer après une modification. Les
-solutions sont sur la [branche
-`gui-solution`](https://github.com/shuuchuu/ghcli/tree/gui-solution) du dépôt.
+`ghcli` needs a GitHub token: if you don't have one, create a test repository and a
+token as [the command-line interface's
+instructions](https://github.com/shuuchuu/ghcli/tree/main-en#a-test-repository-and-a-github-token)
+explain, and put it in a `creds.env` file at the root of the repository. The commands
+run in a terminal at the root of the repository (**Terminal** > **New Terminal** in the
+Codespace), after `source creds.env`. Start the interface with `uv run ghcli gui`, and
+close it (the main window) before starting it again after a change. The solutions are
+on the repository's [`gui-solution-en`
+branch](https://github.com/shuuchuu/ghcli/tree/gui-solution-en).
 
-## Enregistrer les tickets d'un dépôt
+## Saving a repository's issues
 
-Écrivez `_open_list_window`, qui ouvre la fenêtre *List issues*&nbsp;: trois zones de
-saisie, le propriétaire du dépôt, son nom et le fichier où enregistrer ses tickets, un
-bouton *Browse…* qui choisit ce fichier dans une boîte de dialogue, et un bouton *Save
-the issues*. Celui-ci liste les tickets du dépôt (`list_issues`), les enregistre dans le
-fichier (`save_issues_to_file`), puis l'annonce dans une boîte de dialogue. Une zone
-vide, ou une erreur de l'API, s'annonce dans une boîte de dialogue d'erreur.
+Write `_open_list_window`, which opens the *List issues* window: three entries, the
+repository's owner, its name and the file to save its issues to, a *Browse…* button
+that picks that file in a dialog, and a *Save the issues* button. The latter lists the
+repository's issues (`list_issues`), saves them to the file (`save_issues_to_file`),
+then says so in a dialog. An empty entry, or an error of the API, is reported in an
+error dialog.
 
-**Documentation utile**
+**Useful documentation**
 
-- https://docs.python.org/fr/3/library/dialog.html#tkinter.filedialog.asksaveasfilename
-- https://docs.python.org/fr/3/library/tkinter.messagebox.html
+- https://docs.python.org/3/library/dialog.html#tkinter.filedialog.asksaveasfilename
+- https://docs.python.org/3/library/tkinter.messagebox.html
 
 <details>
-<summary>Conseils supplémentaires</summary>
+<summary>Additional hints</summary>
 
-`_entry(frame, "Owner:", 0)` place une zone de saisie sur la première ligne du cadre, et
-la renvoie&nbsp;: `entry.get()` donne son texte, `entry.delete(0, tk.END)` le vide et
-`entry.insert(0, texte)` l'écrit. Les fonctions des boutons se définissent dans
-`_open_list_window`, où elles voient ses zones de saisie. `asksaveasfilename` renvoie le
-chemin choisi, ou une chaîne vide si l'on annule. `list_issues` lève une
-`niquests.HTTPError` pour un dépôt inconnu.
+`_entry(frame, "Owner:", 0)` puts an entry on the frame's first row, and returns it:
+`entry.get()` gives its text, `entry.delete(0, tk.END)` clears it and `entry.insert(0,
+text)` writes it. The buttons' functions are defined inside `_open_list_window`, where
+they see its entries. `asksaveasfilename` returns the chosen path, or an empty string
+when cancelled. `list_issues` raises a `niquests.HTTPError` for an unknown repository.
 
 ```python
 def _open_list_window() -> None:
@@ -95,7 +94,7 @@ def _open_list_window() -> None:
 <details>
 <summary>Solution</summary>
 
-`src/ghcli/gui.py`, avec ses imports&nbsp;:
+`src/ghcli/gui.py`, with its imports:
 
 ```python
 """Graphical user interface to GitHub issues, with Tkinter."""
@@ -149,25 +148,25 @@ def _open_list_window() -> None:
 
 </details>
 
-## Créer un ticket
+## Creating an issue
 
-Écrivez `_open_create_window`, qui ouvre la fenêtre *Create an issue*&nbsp;: le
-propriétaire du dépôt, son nom et le titre du ticket dans des zones de saisie, son
-corps dans une zone de texte de plusieurs lignes, et un bouton *Create the issue* qui
-crée le ticket (`create_issue`), puis donne son URL dans une boîte de dialogue. Créez
-un ticket dans votre dépôt de test, puis enregistrez ses tickets avec l'autre fenêtre.
+Write `_open_create_window`, which opens the *Create an issue* window: the repository's
+owner, its name and the issue's title in entries, its body in a multi-line text area,
+and a *Create the issue* button that creates the issue (`create_issue`), then gives its
+URL in a dialog. Create an issue in your test repository, then save its issues with the
+other window.
 
-**Documentation utile**
+**Useful documentation**
 
 - https://tkdocs.com/tutorial/text.html
 
 <details>
-<summary>Conseils supplémentaires</summary>
+<summary>Additional hints</summary>
 
-`tk.Text(frame, width=40, height=10)` est une zone de texte de plusieurs lignes, qui se
-place avec `grid` comme les autres widgets. `text.get("1.0", tk.END)` donne son
-contenu, de son premier caractère (ligne 1, colonne 0) à sa fin, qui comprend un retour
-à la ligne final&nbsp;: `strip()` l'enlève.
+`tk.Text(frame, width=40, height=10)` is a multi-line text area, laid out with `grid`
+like the other widgets. `text.get("1.0", tk.END)` gives its content, from its first
+character (line 1, column 0) to its end, which includes a final newline: `strip()`
+removes it.
 
 ```python
 def _open_create_window() -> None:
@@ -189,7 +188,7 @@ def _open_create_window() -> None:
 <details>
 <summary>Solution</summary>
 
-`src/ghcli/gui.py`&nbsp;:
+`src/ghcli/gui.py`:
 
 ```python
 def _open_create_window() -> None:
