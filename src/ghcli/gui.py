@@ -38,4 +38,4 @@ def server(input: Inputs, output: Outputs, session: Session) -> None:  # ruff: i
 
 def create_gui() -> None:
     """Serve the interface, at http://127.0.0.1:8000 by default."""
-    run_app(App(app_ui, server))  # ty: ignore[call-non-callable]
+    run_app(App(app_ui, server))  # pyrefly: ignore[not-callable]
