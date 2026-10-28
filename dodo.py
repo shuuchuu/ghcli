@@ -11,7 +11,7 @@ def task_check():
         "actions": [
             "uv run ruff check src/ghcli tests",
             "uv run ruff format --check src/ghcli tests",
-            "uv run ty check src/ghcli tests",
+            "uv run pyrefly check src/ghcli tests",
         ],
     }
 
