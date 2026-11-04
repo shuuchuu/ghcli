@@ -4,13 +4,15 @@ authors = [
 ]
 dependencies = []
 description = "CLI to list and create GitHub issues."
-homepage = "https://github.com/shuuchuu/ghcli"
 license = "Apache-2.0"
 license-files = ["LICENSE"]
 name = "ghcli"
 readme = "README.md"
 requires-python = ">= 3.13"
 version = "0.1.0"
+
+[project.urls]
+Homepage = "https://github.com/shuuchuu/ghcli"
 
 [dependency-groups]
 dev = [
