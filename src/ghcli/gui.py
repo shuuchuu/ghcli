@@ -1,48 +1,47 @@
-"""Interface web montrant quand les tickets d'un dépôt ont été ouverts, avec Shiny."""
+"""Web interface showing when a repository's issues were opened, with Shiny."""
 
 import plotly.graph_objects as go
 from plotly.offline import get_plotlyjs_version
 from shiny import App, Inputs, Outputs, Session, run_app, ui
 
-# Le JavaScript de Plotly, que la page charge une fois, dans son en-tête : chargé par
-# chaque figure, il arriverait trop tard pour dessiner la première.
-SCRIPT_PLOTLY = f"https://cdn.plot.ly/plotly-{get_plotlyjs_version()}.min.js"
+# Plotly's JavaScript, loaded once by the page, in its head: loaded by each figure, it
+# would come too late to draw the first one.
+PLOTLY_SCRIPT = f"https://cdn.plot.ly/plotly-{get_plotlyjs_version()}.min.js"
 
-interface = ui.page_fluid(
-    ui.head_content(ui.tags.script(src=SCRIPT_PLOTLY)),
-    ui.h1("Tickets par date de création"),
-    ui.input_text("proprietaire", "Propriétaire du dépôt", value="octocat"),
-    ui.input_text("depot", "Nom du dépôt", value="Hello-World"),
-    ui.input_action_button("recupere", "Récupérer les tickets"),
-    ui.output_text("nombre"),
-    ui.output_ui("graphique"),
+app_ui = ui.page_fluid(
+    ui.head_content(ui.tags.script(src=PLOTLY_SCRIPT)),
+    ui.h1("Issues by creation date"),
+    ui.input_text("owner", "Repository owner", value="octocat"),
+    ui.input_text("repo", "Repository name", value="Hello-World"),
+    ui.input_action_button("fetch", "Fetch the issues"),
+    ui.output_text("count"),
+    ui.output_ui("plot"),
 )
 
 
-def _convertit_en_html(figure: go.Figure) -> ui.HTML:
-    """Convertit une figure Plotly en HTML qu'affiche une sortie `render.ui`.
+def _figure_html(figure: go.Figure) -> ui.HTML:
+    """Turn a Plotly figure into HTML that a `render.ui` output shows.
 
     Args:
-        figure: La figure.
+        figure: The figure.
 
     Returns:
-        Son HTML, sans le JavaScript de Plotly, que charge l'en-tête de la page.
+        Its HTML, without Plotly's JavaScript, which the page's head loads.
     """
     return ui.HTML(figure.to_html(full_html=False, include_plotlyjs=False))
 
 
-def serveur(entrees: Inputs, sorties: Outputs, session: Session) -> None:
-    """Calcule les sorties à partir des entrées.
+def server(input: Inputs, output: Outputs, session: Session) -> None:  # ruff: ignore[builtin-argument-shadowing]
+    """Compute the outputs from the inputs.
 
     Args:
-        entrees: Les entrées, par identifiant : `entrees.proprietaire()` est le
-            propriétaire saisi.
-        sorties: Les sorties (inutilisées : les décorateurs `render` les enregistrent).
-        session: La session du navigateur (inutilisée).
+        input: The inputs, by ID: `input.owner()` is the owner typed in.
+        output: The outputs (unused: the `render` decorators register them).
+        session: The browser's session (unused).
     """
-    # Votre code ici
+    # Your code here
 
 
-def cree_interface() -> None:
-    """Sert l'interface, à l'adresse http://127.0.0.1:8000 par défaut."""
-    run_app(App(interface, serveur))  # pyrefly: ignore[not-callable]
+def create_gui() -> None:
+    """Serve the interface, at http://127.0.0.1:8000 by default."""
+    run_app(App(app_ui, server))  # pyrefly: ignore[not-callable]
