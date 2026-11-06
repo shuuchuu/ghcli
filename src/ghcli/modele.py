@@ -1,6 +1,7 @@
 """Les tickets que manipule l'interface en ligne de commande."""
 
 from dataclasses import dataclass
+from datetime import datetime
 from typing import Any, Self
 
 
@@ -11,6 +12,7 @@ class Ticket:
     titre: str
     corps: str
     url: str
+    date_creation: datetime
 
     @classmethod
     def depuis_dict(cls, donnees: dict[str, Any]) -> Self:
@@ -24,5 +26,8 @@ class Ticket:
         """
         # Le corps d'un ticket vaut null quand il n'en a pas.
         return cls(
-            titre=donnees["title"], corps=donnees["body"] or "", url=donnees["html_url"]
+            titre=donnees["title"],
+            corps=donnees["body"] or "",
+            url=donnees["html_url"],
+            date_creation=datetime.fromisoformat(donnees["created_at"]),
         )

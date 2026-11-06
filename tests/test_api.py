@@ -1,4 +1,5 @@
 import sys
+from datetime import UTC, datetime
 from typing import Any
 
 import niquests
@@ -12,6 +13,7 @@ TICKET = {
     "title": "Un titre",
     "body": "Un corps",
     "html_url": "https://github.com/octocat/sandbox/issues/1",
+    "created_at": "2026-10-22T09:30:00Z",
 }
 
 
@@ -62,7 +64,12 @@ def test_liste_tickets(monkeypatch: pytest.MonkeyPatch) -> None:
 
     monkeypatch.setattr(niquests, "get", fausse_lecture)
     assert liste_tickets("octocat", "sandbox") == [
-        Ticket("Un titre", "Un corps", "https://github.com/octocat/sandbox/issues/1")
+        Ticket(
+            "Un titre",
+            "Un corps",
+            "https://github.com/octocat/sandbox/issues/1",
+            datetime(2026, 10, 22, 9, 30, tzinfo=UTC),
+        )
     ]
     assert appels == [
         ("https://api.github.com/repos/octocat/sandbox/issues", "Bearer un-jeton")
