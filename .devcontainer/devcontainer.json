@@ -6,8 +6,21 @@
     "dockerfile": "Dockerfile"
   },
   // Features to add to the dev container. More info: https://containers.dev/features.
+  // Un bureau, affiché dans le navigateur sur le port 6080, où s'ouvrent les fenêtres de
+  // Tkinter.
+  "features": {
+    "ghcr.io/devcontainers/features/desktop-lite:1": {
+      "password": "noPassword"
+    }
+  },
   // Use 'forwardPorts' to make a list of ports inside the container available locally.
-  // "forwardPorts": [],
+  "forwardPorts": [6080],
+  "portsAttributes": {
+    "6080": {
+      "label": "Bureau / Desktop",
+      "onAutoForward": "silent"
+    }
+  },
   // Use 'postCreateCommand' to run commands after the container is created.
   "postCreateCommand": "uv sync --all-extras",
   // Configure tool-specific properties.
