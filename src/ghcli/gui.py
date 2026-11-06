@@ -1,8 +1,17 @@
 """Interface web montrant quand les tickets d'un dépôt ont été ouverts, avec Shiny."""
 
+from collections import Counter
+from typing import TYPE_CHECKING
+
 import plotly.graph_objects as go
+from niquests import HTTPError
 from plotly.offline import get_plotlyjs_version
-from shiny import App, Inputs, Outputs, Session, run_app, ui
+from shiny import App, Inputs, Outputs, Session, reactive, render, run_app, ui
+
+from .api import liste_tickets
+
+if TYPE_CHECKING:
+    from .modele import Ticket
 
 # Le JavaScript de Plotly, que la page charge une fois, dans son en-tête : chargé par
 # chaque figure, il arriverait trop tard pour dessiner la première.
@@ -40,7 +49,36 @@ def serveur(entrees: Inputs, sorties: Outputs, session: Session) -> None:
         sorties: Les sorties (inutilisées : les décorateurs `render` les enregistrent).
         session: La session du navigateur (inutilisée).
     """
-    # Votre code ici
+    tickets: reactive.Value[list[Ticket]] = reactive.Value([])
+    erreur = reactive.Value("")
+
+    # S'exécute à chaque clic sur le bouton seulement, pas quand les entrées changent.
+    @reactive.effect
+    @reactive.event(entrees.recupere)
+    def recupere() -> None:
+        try:
+            tickets.set(liste_tickets(entrees.proprietaire(), entrees.depot()))
+            erreur.set("")
+        except HTTPError as exception:
+            tickets.set([])
+            erreur.set(f"Impossible de lister les tickets : {exception}")
+
+    # Les fonctions portent le nom des identifiants de leurs sorties.
+    @render.text
+    def nombre() -> str:
+        return erreur() or f"{len(tickets())} ticket(s)"
+
+    @render.ui
+    def graphique() -> ui.HTML | None:
+        if not tickets():
+            return None
+        par_jour = Counter(ticket.date_creation.date() for ticket in tickets())
+        jours = sorted(par_jour)
+        figure = go.Figure(go.Bar(x=jours, y=[par_jour[jour] for jour in jours]))
+        figure.update_layout(
+            title="Tickets ouverts par jour", xaxis_title="Jour", yaxis_title="Tickets"
+        )
+        return _convertit_en_html(figure)
 
 
 def cree_interface() -> None:
