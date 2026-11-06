@@ -41,6 +41,16 @@ def creer(
     console.print(f"{ticket.url} - {ticket.titre} - {ticket.corps}")
 
 
+@app.command("gui")
+def ouvrir() -> None:
+    """Ouvre l'interface graphique."""
+    # Importée ici : les autres commandes n'ont pas besoin des bibliothèques de
+    # l'interface.
+    from .gui import cree_interface
+
+    cree_interface()
+
+
 def main() -> None:
     """Exécute la commande que nomment les arguments."""
     try:
