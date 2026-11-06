@@ -1,7 +1,11 @@
 """Interface web pour les tickets GitHub, avec Gradio."""
 
-import gradio as gr
+import os
 
+import gradio as gr
+from niquests import HTTPError
+
+from .api import cree_ticket, liste_tickets
 from .modele import Ticket
 
 
@@ -17,6 +21,27 @@ def _formate_ticket(ticket: Ticket) -> str:
     return f"### [{ticket.titre}]({ticket.url})\n\n{ticket.corps}"
 
 
+def _liste_tickets(proprietaire: str, depot: str) -> str:
+    try:
+        tickets = liste_tickets(proprietaire, depot)
+    except HTTPError as erreur:
+        return f"Impossible de lister les tickets : {erreur}"
+    return "\n\n---\n\n".join(map(_formate_ticket, tickets)) or "Aucun ticket."
+
+
+def _cree_ticket(proprietaire: str, depot: str, titre: str, corps: str) -> str:
+    if not os.environ.get("GHCLI_TOKEN"):
+        return (
+            "Impossible de créer le ticket sans jeton GitHub : définissez la variable "
+            "d'environnement GHCLI_TOKEN."
+        )
+    try:
+        ticket = cree_ticket(proprietaire, depot, titre, corps)
+    except HTTPError as erreur:
+        return f"Impossible de créer le ticket : {erreur}"
+    return _formate_ticket(ticket)
+
+
 def construit_app() -> gr.Blocks:
     """Construit l'application : un onglet liste les tickets, un autre en crée un.
 
@@ -26,11 +51,25 @@ def construit_app() -> gr.Blocks:
     with gr.Blocks(title="ghcli") as app:
         gr.Markdown("# ghcli\n\nListe et crée les tickets d'un dépôt GitHub.")
         with gr.Tab("Lister les tickets"):
-            # Votre code ici
-            ...
+            with gr.Row():
+                proprietaire = gr.Textbox(label="Propriétaire", placeholder="octocat")
+                depot = gr.Textbox(label="Dépôt", placeholder="Hello-World")
+            bouton = gr.Button("Afficher les tickets")
+            tickets = gr.Markdown()
+            # Les arguments de la fonction sont les valeurs des entrées, sa valeur de
+            # retour celle de la sortie.
+            bouton.click(_liste_tickets, inputs=[proprietaire, depot], outputs=tickets)
         with gr.Tab("Créer un ticket"):
-            # Votre code ici
-            ...
+            with gr.Row():
+                proprietaire = gr.Textbox(label="Propriétaire")
+                depot = gr.Textbox(label="Dépôt")
+            titre = gr.Textbox(label="Titre")
+            corps = gr.Textbox(label="Corps", lines=6)
+            bouton = gr.Button("Créer le ticket")
+            ticket = gr.Markdown()
+            bouton.click(
+                _cree_ticket, inputs=[proprietaire, depot, titre, corps], outputs=ticket
+            )
     return app
 
 
