@@ -1,90 +1,89 @@
-# Interface web Gradio pour GitHub Issues
+# Gradio web interface for GitHub Issues
 
-*[English version](https://github.com/shuuchuu/ghcli/tree/gradio-en)*
+*[Version française](https://github.com/shuuchuu/ghcli/tree/gradio)*
 
-Le projet des travaux pratiques *Interface web Gradio pour GitHub Issues*. Ils partent
-de la solution des travaux pratiques [*Interface en ligne de commande pour GitHub
-Issues*](https://github.com/shuuchuu/ghcli)&nbsp;: `ghcli list` et `ghcli create`
-listent et créent les tickets d'un dépôt, et sont testés. Nous allons leur ajouter une
-interface web, avec Gradio. Leur énoncé est ci-dessous, pour les faire dans un
-Codespace GitHub ou un clone local&nbsp;; c'est le même que celui du notebook des
-travaux pratiques, en
-[français](https://colab.research.google.com/github/shuuchuu/labs/blob/main/gui-github-issues-gradio-hands-on-fr.ipynb)
-ou en
-[anglais](https://colab.research.google.com/github/shuuchuu/labs/blob/main/gui-github-issues-gradio-hands-on-en.ipynb),
-qui les fait dans Colab.
+The project of the *Gradio web interface for GitHub Issues* lab. It starts from the
+solution of the [*Command-line interface for GitHub
+Issues*](https://github.com/shuuchuu/ghcli/tree/main-en) lab: `ghcli list` and `ghcli
+create` list and create a repository's issues, and are tested. We are going to add a
+web interface to them, with Gradio. Its instructions are below, to run the lab in a
+GitHub Codespace or a local clone; they are the same as the lab's notebook, in
+[English](https://colab.research.google.com/github/shuuchuu/labs/blob/main/gui-github-issues-gradio-hands-on-en.ipynb)
+or in
+[French](https://colab.research.google.com/github/shuuchuu/labs/blob/main/gui-github-issues-gradio-hands-on-fr.ipynb),
+which runs it in Colab.
 
-Le projet contient pour cela&nbsp;:
+For that, the project holds:
 
-- `src/ghcli/gui.py`, l'interface à compléter&nbsp;: `construit_app` construit une
-  application à deux onglets, vides pour l'instant, `cree_interface` la sert, et
-  `_formate_ticket` écrit un ticket en Markdown&nbsp;;
-- la commande `ghcli gui`, qui lance l'interface.
+- `src/ghcli/gui.py`, the interface to complete: `build_app` builds an app with two
+  tabs, empty for now, `create_gui` serves it, and `_format_issue` writes an issue in
+  Markdown;
+- the `ghcli gui` command, which starts the interface.
 
-## Mise en place de l'environnement de travail
+## Setting up the working environment
 
-Ouvrez le dépôt dans un Codespace, sur sa branche `gradio`&nbsp;: sur GitHub, sur la
-branche `gradio`, **Code** > **Codespaces** > **Create codespace on gradio**, ou [ce
-lien](https://codespaces.new/shuuchuu/ghcli/tree/gradio). Le Codespace installe les
-dépendances à sa création, dans le `.venv` du projet.
+This English version of the lab is the repository's `gradio-en` branch. Open it in a
+Codespace: on GitHub, on the `gradio-en` branch, **Code** > **Codespaces** > **Create
+codespace on gradio-en**, or [this
+link](https://codespaces.new/shuuchuu/ghcli/tree/gradio-en). The Codespace installs
+the dependencies when it is created, in the project's `.venv`.
 
-Dans un clone local de cette branche (`git clone -b gradio
-https://github.com/shuuchuu/ghcli.git`), installez
-[uv](https://docs.astral.sh/uv/getting-started/installation/), puis lancez `uv sync` à
-la racine du dépôt.
+In a local clone of that branch (`git clone -b gradio-en
+https://github.com/shuuchuu/ghcli.git`), install
+[uv](https://docs.astral.sh/uv/getting-started/installation/), then run `uv sync` at the
+root of the repository.
 
-`ghcli` a besoin d'un jeton GitHub&nbsp;: si vous n'en avez pas, créez un dépôt de test
-et un jeton comme l'explique [l'énoncé de l'interface en ligne de
-commande](https://github.com/shuuchuu/ghcli#un-dépôt-de-test-et-un-jeton-github), et
-mettez-le dans un fichier `creds.env` à la racine du dépôt. Les commandes se lancent
-dans un terminal à la racine du dépôt (**Terminal** > **Nouveau terminal** dans le
-Codespace), après `source creds.env`. `uv run ghcli gui` sert l'interface à l'adresse
-`http://127.0.0.1:7860`&nbsp;: le Codespace propose de l'ouvrir dans le navigateur
-(**Open in Browser**, ou l'onglet **Ports**, à côté du terminal). `Ctrl+C` l'arrête,
-avant de la relancer après une modification. Les solutions sont sur la [branche
-`gradio-solution`](https://github.com/shuuchuu/ghcli/tree/gradio-solution) du dépôt.
+`ghcli` needs a GitHub token: if you don't have one, create a test repository and a
+token as [the command-line interface's
+instructions](https://github.com/shuuchuu/ghcli/tree/main-en#a-test-repository-and-a-github-token)
+explain, and put it in a `creds.env` file at the root of the repository. The commands
+run in a terminal at the root of the repository (**Terminal** > **New Terminal** in the
+Codespace), after `source creds.env`. `uv run ghcli gui` serves the interface at
+`http://127.0.0.1:7860`: the Codespace offers to open it in the browser (**Open in
+Browser**, or the **Ports** tab, next to the terminal). `Ctrl+C` stops it, before
+starting it again after a change. The solutions are on the repository's
+[`gradio-solution-en` branch](https://github.com/shuuchuu/ghcli/tree/gradio-solution-en).
 
-## Lister les tickets d'un dépôt
+## Listing a repository's issues
 
-Dans l'onglet *Lister les tickets* de `construit_app`, ajoutez deux zones de texte, le
-propriétaire du dépôt et son nom, un bouton *Afficher les tickets* et une zone de
-Markdown où s'affichent les tickets. Le bouton appelle une fonction
-`_liste_tickets(proprietaire: str, depot: str) -> str`, à écrire, qui renvoie les
-tickets du dépôt en Markdown, séparés par une ligne horizontale (`---`), `Aucun ticket.`
-s'il n'en a pas, ou un message d'erreur si l'API en renvoie une.
+In `build_app`'s *List issues* tab, add two text boxes, the repository's owner and its
+name, a *List the issues* button and a Markdown area where the issues show. The button
+calls a `_list_issues(owner: str, repo: str) -> str` function, to write, which returns
+the repository's issues in Markdown, separated by a horizontal rule (`---`), `No
+issue.` when it has none, or an error message when the API returns one.
 
-**Documentation utile**
+**Useful documentation**
 
 - https://www.gradio.app/guides/blocks-and-event-listeners
 - https://www.gradio.app/docs/gradio/textbox
 - https://www.gradio.app/docs/gradio/markdown
 
 <details>
-<summary>Conseils supplémentaires</summary>
+<summary>Additional hints</summary>
 
-Dans un bloc `with gr.Tab(...)`, chaque composant créé s'ajoute à l'onglet, et `with
-gr.Row():` en place plusieurs côte à côte. `bouton.click(fonction, inputs=[...],
-outputs=...)` appelle la fonction avec les valeurs des composants d'entrée, et affiche
-ce qu'elle renvoie dans celui de sortie. `liste_tickets` lève une `niquests.HTTPError`
-pour un dépôt inconnu.
+Inside a `with gr.Tab(...)` block, each component created is added to the tab, and
+`with gr.Row():` lays out several side by side. `button.click(function, inputs=[...],
+outputs=...)` calls the function with the input components' values, and shows what it
+returns in the output one. `list_issues` raises a `niquests.HTTPError` for an unknown
+repository.
 
 ```python
-def _liste_tickets(proprietaire: str, depot: str) -> str:
+def _list_issues(owner: str, repo: str) -> str:
     try:
-        tickets = liste_tickets(proprietaire, depot)
-    except HTTPError as erreur:
+        issues = list_issues(owner, repo)
+    except HTTPError as error:
         return ...
-    return "\n\n---\n\n".join(...) or "Aucun ticket."
+    return "\n\n---\n\n".join(...) or "No issue."
 
 
-# Dans construit_app :
-with gr.Tab("Lister les tickets"):
+# In build_app:
+with gr.Tab("List issues"):
     with gr.Row():
-        proprietaire = gr.Textbox(label="Propriétaire", placeholder="octocat")
+        owner = gr.Textbox(label="Owner", placeholder="octocat")
         ...
-    bouton = gr.Button("Afficher les tickets")
-    tickets = gr.Markdown()
-    bouton.click(_liste_tickets, inputs=[...], outputs=...)
+    button = gr.Button("List the issues")
+    issues = gr.Markdown()
+    button.click(_list_issues, inputs=[...], outputs=...)
 ```
 
 </details>
@@ -92,65 +91,64 @@ with gr.Tab("Lister les tickets"):
 <details>
 <summary>Solution</summary>
 
-`src/ghcli/gui.py`, avec ses imports&nbsp;:
+`src/ghcli/gui.py`, with its imports:
 
 ```python
-"""Interface web pour les tickets GitHub, avec Gradio."""
+"""Web interface to GitHub issues, with Gradio."""
 
 import gradio as gr
 from niquests import HTTPError
 
-from .api import cree_ticket, liste_tickets
-from .modele import Ticket
+from .api import create_issue, list_issues
+from .model import Issue
 ```
 
 ```python
-def _liste_tickets(proprietaire: str, depot: str) -> str:
+def _list_issues(owner: str, repo: str) -> str:
     try:
-        tickets = liste_tickets(proprietaire, depot)
-    except HTTPError as erreur:
-        return f"Impossible de lister les tickets : {erreur}"
-    return "\n\n---\n\n".join(map(_formate_ticket, tickets)) or "Aucun ticket."
+        issues = list_issues(owner, repo)
+    except HTTPError as error:
+        return f"Could not list the issues: {error}"
+    return "\n\n---\n\n".join(map(_format_issue, issues)) or "No issue."
 ```
 
-Dans `construit_app`&nbsp;:
+In `build_app`:
 
 ```python
-with gr.Tab("Lister les tickets"):
+with gr.Tab("List issues"):
     with gr.Row():
-        proprietaire = gr.Textbox(label="Propriétaire", placeholder="octocat")
-        depot = gr.Textbox(label="Dépôt", placeholder="Hello-World")
-    bouton = gr.Button("Afficher les tickets")
-    tickets = gr.Markdown()
-    # Les arguments de la fonction sont les valeurs des entrées, sa valeur de
-    # retour celle de la sortie.
-    bouton.click(_liste_tickets, inputs=[proprietaire, depot], outputs=tickets)
+        owner = gr.Textbox(label="Owner", placeholder="octocat")
+        repo = gr.Textbox(label="Repository", placeholder="Hello-World")
+    button = gr.Button("List the issues")
+    issues = gr.Markdown()
+    # The function's arguments are the inputs' values, its return value
+    # the output's.
+    button.click(_list_issues, inputs=[owner, repo], outputs=issues)
 ```
 
 </details>
 
-## Créer un ticket
+## Creating an issue
 
-Dans l'onglet *Créer un ticket*, ajoutez le propriétaire du dépôt, son nom, le titre du
-ticket et son corps (une zone de texte de plusieurs lignes), un bouton *Créer le
-ticket* et une zone de Markdown qui affiche le ticket créé, ou un message d'erreur. Le
-bouton appelle une fonction `_cree_ticket`, à écrire. Créez un ticket dans votre dépôt
-de test, puis listez ses tickets dans l'autre onglet.
+In the *Create an issue* tab, add the repository's owner, its name, the issue's title
+and its body (a multi-line text box), a *Create the issue* button and a Markdown area
+that shows the created issue, or an error message. The button calls a `_create_issue`
+function, to write. Create an issue in your test repository, then list its issues in
+the other tab.
 
 <details>
-<summary>Conseils supplémentaires</summary>
+<summary>Additional hints</summary>
 
-`gr.Textbox(label="Corps", lines=6)` est une zone de texte de six lignes. Les deux
-onglets peuvent réutiliser les mêmes noms de variables&nbsp;: chaque `click` reçoit les
-composants qui existent à son appel.
+`gr.Textbox(label="Body", lines=6)` is a six-line text box. The two tabs can reuse the
+same variable names: each `click` gets the components that exist when it's called.
 
 ```python
-def _cree_ticket(proprietaire: str, depot: str, titre: str, corps: str) -> str:
+def _create_issue(owner: str, repo: str, title: str, body: str) -> str:
     try:
-        ticket = cree_ticket(proprietaire, depot, titre, corps)
-    except HTTPError as erreur:
+        issue = create_issue(owner, repo, title, body)
+    except HTTPError as error:
         return ...
-    return _formate_ticket(ticket)
+    return _format_issue(issue)
 ```
 
 </details>
@@ -158,31 +156,29 @@ def _cree_ticket(proprietaire: str, depot: str, titre: str, corps: str) -> str:
 <details>
 <summary>Solution</summary>
 
-`src/ghcli/gui.py`&nbsp;:
+`src/ghcli/gui.py`:
 
 ```python
-def _cree_ticket(proprietaire: str, depot: str, titre: str, corps: str) -> str:
+def _create_issue(owner: str, repo: str, title: str, body: str) -> str:
     try:
-        ticket = cree_ticket(proprietaire, depot, titre, corps)
-    except HTTPError as erreur:
-        return f"Impossible de créer le ticket : {erreur}"
-    return _formate_ticket(ticket)
+        issue = create_issue(owner, repo, title, body)
+    except HTTPError as error:
+        return f"Could not create the issue: {error}"
+    return _format_issue(issue)
 ```
 
-Dans `construit_app`&nbsp;:
+In `build_app`:
 
 ```python
-with gr.Tab("Créer un ticket"):
+with gr.Tab("Create an issue"):
     with gr.Row():
-        proprietaire = gr.Textbox(label="Propriétaire")
-        depot = gr.Textbox(label="Dépôt")
-    titre = gr.Textbox(label="Titre")
-    corps = gr.Textbox(label="Corps", lines=6)
-    bouton = gr.Button("Créer le ticket")
-    ticket = gr.Markdown()
-    bouton.click(
-        _cree_ticket, inputs=[proprietaire, depot, titre, corps], outputs=ticket
-    )
+        owner = gr.Textbox(label="Owner")
+        repo = gr.Textbox(label="Repository")
+    title = gr.Textbox(label="Title")
+    body = gr.Textbox(label="Body", lines=6)
+    button = gr.Button("Create the issue")
+    issue = gr.Markdown()
+    button.click(_create_issue, inputs=[owner, repo, title, body], outputs=issue)
 ```
 
 </details>
