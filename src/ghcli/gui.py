@@ -1,64 +1,62 @@
-"""Interface graphique pour les tickets GitHub, avec Tkinter."""
+"""Graphical user interface to GitHub issues, with Tkinter."""
 
 import tkinter as tk
 from tkinter import ttk
 
 
-def _ouvre_fenetre(titre: str) -> ttk.Frame:
-    """Ouvre une fenêtre au-dessus de la principale.
+def _window(title: str) -> ttk.Frame:
+    """Open a window on top of the main one.
 
     Args:
-        titre: Le titre de la fenêtre.
+        title: The window's title.
 
     Returns:
-        Le cadre de la fenêtre, où placer ses widgets avec `grid`.
+        The window's frame, to lay out its widgets in with `grid`.
     """
-    fenetre = tk.Toplevel()
-    fenetre.title(titre)
-    cadre = ttk.Frame(fenetre, padding=10)
-    cadre.grid()
-    return cadre
+    window = tk.Toplevel()
+    window.title(title)
+    frame = ttk.Frame(window, padding=10)
+    frame.grid()
+    return frame
 
 
-def _ajoute_champ(cadre: ttk.Frame, libelle: str, ligne: int) -> ttk.Entry:
-    """Ajoute un champ de saisie avec son libellé sur une ligne d'un cadre.
+def _entry(frame: ttk.Frame, label: str, row: int) -> ttk.Entry:
+    """Add a labeled entry on a row of a frame.
 
     Args:
-        cadre: Le cadre où l'ajouter.
-        libelle: Le texte à sa gauche.
-        ligne: Sa ligne dans la grille du cadre.
+        frame: The frame to add it to.
+        label: The text on its left.
+        row: Its row in the frame's grid.
 
     Returns:
-        Le champ, dont `get()` donne le texte saisi.
+        The entry, whose `get()` gives the text typed in.
     """
-    ttk.Label(cadre, text=libelle).grid(
-        row=ligne, column=0, padx=10, pady=5, sticky="w"
-    )
-    champ = ttk.Entry(cadre, width=40)
-    champ.grid(row=ligne, column=1, padx=10, pady=5)
-    return champ
+    ttk.Label(frame, text=label).grid(row=row, column=0, padx=10, pady=5, sticky="w")
+    entry = ttk.Entry(frame, width=40)
+    entry.grid(row=row, column=1, padx=10, pady=5)
+    return entry
 
 
-def _ouvre_fenetre_liste() -> None:
-    """Ouvre la fenêtre qui enregistre les tickets d'un dépôt dans un fichier JSON."""
-    # Votre code ici
+def _open_list_window() -> None:
+    """Open the window that saves a repository's issues to a JSON file."""
+    # Your code here
 
 
-def _ouvre_fenetre_creation() -> None:
-    """Ouvre la fenêtre qui crée un ticket."""
-    # Votre code ici
+def _open_create_window() -> None:
+    """Open the window that creates an issue."""
+    # Your code here
 
 
-def cree_interface() -> None:
-    """Ouvre la fenêtre principale, dont les boutons ouvrent les autres."""
-    racine = tk.Tk()
-    racine.title("ghcli")
-    cadre = ttk.Frame(racine, padding=10)
-    cadre.grid()
-    ttk.Button(cadre, text="Lister les tickets", command=_ouvre_fenetre_liste).grid(
+def create_gui() -> None:
+    """Open the main window, whose buttons open the others."""
+    root = tk.Tk()
+    root.title("ghcli")
+    frame = ttk.Frame(root, padding=10)
+    frame.grid()
+    ttk.Button(frame, text="List issues", command=_open_list_window).grid(
         row=0, column=0, padx=20, pady=10
     )
-    ttk.Button(cadre, text="Créer un ticket", command=_ouvre_fenetre_creation).grid(
+    ttk.Button(frame, text="Create an issue", command=_open_create_window).grid(
         row=1, column=0, padx=20, pady=10
     )
-    racine.mainloop()
+    root.mainloop()

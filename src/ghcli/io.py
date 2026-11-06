@@ -1,21 +1,19 @@
-"""Enregistrement des tickets dans des fichiers."""
+"""Saving issues to files."""
 
 import json
 from collections.abc import Iterable
 from dataclasses import asdict
 from pathlib import Path
 
-from .modele import Ticket
+from .model import Issue
 
 
-def enregistre_tickets(tickets: Iterable[Ticket], chemin: Path) -> None:
-    """Enregistre des tickets dans un fichier JSON, sous forme de liste d'objets.
+def save_issues_to_file(issues: Iterable[Issue], path: Path) -> None:
+    """Save issues to a JSON file, as a list of objects.
 
     Args:
-        tickets: Les tickets à enregistrer.
-        chemin: Le fichier JSON à écrire.
+        issues: The issues to save.
+        path: The JSON file to write.
     """
-    donnees = [asdict(ticket) for ticket in tickets]
-    chemin.write_text(
-        json.dumps(donnees, ensure_ascii=False, indent=2), encoding="utf-8"
-    )
+    data = [asdict(issue) for issue in issues]
+    path.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
