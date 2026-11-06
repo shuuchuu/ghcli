@@ -48,7 +48,7 @@ select = ["A", "B", "C", "D", "DOC", "E", "EM", "F", "I", "N", "PIE", "PTH", "RE
 convention = "google"
 
 [tool.uv.build-backend]
-# Publié sous le nom ghcli-<utilisateur GitHub>, importé sous le nom ghcli.
+# Published as ghcli-<GitHub user>, imported as ghcli.
 module-name = "ghcli"
 
 [[tool.uv.index]]
