@@ -1,4 +1,4 @@
-"""Interface web montrant quand les tickets d'un dépôt ont été ouverts, avec Shiny."""
+"""Web interface showing when a repository's issues were opened, with Shiny."""
 
 from collections import Counter
 from typing import TYPE_CHECKING
@@ -8,79 +8,78 @@ from niquests import HTTPError
 from plotly.offline import get_plotlyjs_version
 from shiny import App, Inputs, Outputs, Session, reactive, render, run_app, ui
 
-from .api import liste_tickets
+from .api import list_issues
 
 if TYPE_CHECKING:
-    from .modele import Ticket
+    from .model import Issue
 
-# Le JavaScript de Plotly, que la page charge une fois, dans son en-tête : chargé par
-# chaque figure, il arriverait trop tard pour dessiner la première.
-SCRIPT_PLOTLY = f"https://cdn.plot.ly/plotly-{get_plotlyjs_version()}.min.js"
+# Plotly's JavaScript, loaded once by the page, in its head: loaded by each figure, it
+# would come too late to draw the first one.
+PLOTLY_SCRIPT = f"https://cdn.plot.ly/plotly-{get_plotlyjs_version()}.min.js"
 
-interface = ui.page_fluid(
-    ui.head_content(ui.tags.script(src=SCRIPT_PLOTLY)),
-    ui.h1("Tickets par date de création"),
-    ui.input_text("proprietaire", "Propriétaire du dépôt", value="octocat"),
-    ui.input_text("depot", "Nom du dépôt", value="Hello-World"),
-    ui.input_action_button("recupere", "Récupérer les tickets"),
-    ui.output_text("nombre"),
-    ui.output_ui("graphique"),
+app_ui = ui.page_fluid(
+    ui.head_content(ui.tags.script(src=PLOTLY_SCRIPT)),
+    ui.h1("Issues by creation date"),
+    ui.input_text("owner", "Repository owner", value="octocat"),
+    ui.input_text("repo", "Repository name", value="Hello-World"),
+    ui.input_action_button("fetch", "Fetch the issues"),
+    ui.output_text("count"),
+    ui.output_ui("plot"),
 )
 
 
-def _convertit_en_html(figure: go.Figure) -> ui.HTML:
-    """Convertit une figure Plotly en HTML qu'affiche une sortie `render.ui`.
+def _figure_html(figure: go.Figure) -> ui.HTML:
+    """Turn a Plotly figure into HTML that a `render.ui` output shows.
 
     Args:
-        figure: La figure.
+        figure: The figure.
 
     Returns:
-        Son HTML, sans le JavaScript de Plotly, que charge l'en-tête de la page.
+        Its HTML, without Plotly's JavaScript, which the page's head loads.
     """
     return ui.HTML(figure.to_html(full_html=False, include_plotlyjs=False))
 
 
-def serveur(entrees: Inputs, sorties: Outputs, session: Session) -> None:
-    """Calcule les sorties à partir des entrées.
+def server(input: Inputs, output: Outputs, session: Session) -> None:  # ruff: ignore[builtin-argument-shadowing]
+    """Compute the outputs from the inputs.
 
     Args:
-        entrees: Les entrées, par identifiant : `entrees.proprietaire()` est le
-            propriétaire saisi.
-        sorties: Les sorties (inutilisées : les décorateurs `render` les enregistrent).
-        session: La session du navigateur (inutilisée).
+        input: The inputs, by ID: `input.owner()` is the owner typed in.
+        output: The outputs (unused: the `render` decorators register them).
+        session: The browser's session (unused).
     """
-    tickets: reactive.Value[list[Ticket]] = reactive.Value([])
-    erreur = reactive.Value("")
+    issues: reactive.Value[list[Issue]] = reactive.Value([])
+    error = reactive.Value("")
 
-    # S'exécute à chaque clic sur le bouton seulement, pas quand les entrées changent.
+    # Runs on each click of the button only, not when the inputs change.
     @reactive.effect
-    @reactive.event(entrees.recupere)
-    def recupere() -> None:
+    @reactive.event(input.fetch)
+    def fetch() -> None:
         try:
-            tickets.set(liste_tickets(entrees.proprietaire(), entrees.depot()))
-            erreur.set("")
+            issues.set(list_issues(input.owner(), input.repo()))
+            error.set("")
         except HTTPError as exception:
-            tickets.set([])
-            erreur.set(f"Impossible de lister les tickets : {exception}")
+            issues.set([])
+            error.set(f"Could not list the issues: {exception}")
 
-    # Les fonctions portent le nom des identifiants de leurs sorties.
+    # The functions are named after their outputs' IDs.
     @render.text
-    def nombre() -> str:
-        return erreur() or f"{len(tickets())} ticket(s)"
+    def count() -> str:
+        return error() or f"{len(issues())} issue(s)"
 
     @render.ui
-    def graphique() -> ui.HTML | None:
-        if not tickets():
+    def plot() -> ui.HTML | None:
+        if not issues():
             return None
-        par_jour = Counter(ticket.date_creation.date() for ticket in tickets())
-        jours = sorted(par_jour)
-        figure = go.Figure(go.Bar(x=jours, y=[par_jour[jour] for jour in jours]))
+        per_day = Counter(issue.created_at.date() for issue in issues())
+        days = sorted(per_day)
+        figure = go.Figure(go.Bar(x=days, y=[per_day[day] for day in days]))
         figure.update_layout(
-            title="Tickets ouverts par jour", xaxis_title="Jour", yaxis_title="Tickets"
+            title="Issues opened per day", xaxis_title="Day", yaxis_title="Issues"
         )
-        return _convertit_en_html(figure)
+        return _figure_html(figure)
 
 
-def cree_interface() -> None:
-    """Sert l'interface, à l'adresse http://127.0.0.1:8000 par défaut."""
-    run_app(App(interface, serveur))  # pyrefly: ignore[not-callable]
+def create_gui() -> None:
+    """Serve the interface, at http://127.0.0.1:8000 by default."""
+    run_app(App(app_ui, server))  # pyrefly: ignore[not-callable]
