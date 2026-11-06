@@ -1,90 +1,87 @@
-# Tableau de bord Shiny pour GitHub Issues
+# Shiny dashboard for GitHub Issues
 
-*[English version](https://github.com/shuuchuu/ghcli/tree/shiny-en)*
+*[Version française](https://github.com/shuuchuu/ghcli/tree/shiny)*
 
-Le projet des travaux pratiques *Tableau de bord Shiny pour GitHub Issues*. Ils partent
-de la solution des travaux pratiques [*Interface en ligne de commande pour GitHub
-Issues*](https://github.com/shuuchuu/ghcli)&nbsp;: `ghcli list` et `ghcli create`
-listent et créent les tickets d'un dépôt, et sont testés. Nous allons leur ajouter un
-tableau de bord web, avec Shiny&nbsp;: le nombre de tickets ouverts chaque jour, en
-diagramme en barres. Leur énoncé est ci-dessous, pour les faire dans un Codespace
-GitHub ou un clone local (Colab n'affiche pas le serveur web qu'ouvre Shiny).
+The project of the *Shiny dashboard for GitHub Issues* lab. It starts from the solution
+of the [*Command-line interface for GitHub
+Issues*](https://github.com/shuuchuu/ghcli/tree/main-en) lab: `ghcli list` and `ghcli
+create` list and create a repository's issues, and are tested. We are going to add a
+web dashboard to them, with Shiny: the number of issues opened each day, as a bar
+chart. Its instructions are below, to run the lab in a GitHub Codespace or a local clone
+(Colab doesn't show the web server Shiny opens).
 
-Le projet contient pour cela&nbsp;:
+For that, the project holds:
 
-- `src/ghcli/gui.py`, l'application à compléter&nbsp;: `interface` en décrit l'interface
-  (deux zones de texte, `proprietaire` et `depot`, un bouton, `recupere`, et deux
-  sorties, `nombre` et `graphique`), `serveur` en calculera les sorties,
-  `cree_interface` la sert, et `_convertit_en_html` transforme une figure Plotly en HTML
-  qu'affiche une sortie&nbsp;;
-- dans `src/ghcli/modele.py`, la date de création de chaque ticket,
-  `Ticket.date_creation`&nbsp;;
-- la commande `ghcli gui`, qui lance l'application.
+- `src/ghcli/gui.py`, the app to complete: `app_ui` describes its interface (two text
+  boxes, `owner` and `repo`, a button, `fetch`, and two outputs, `count` and `plot`),
+  `server` will compute its outputs, `create_gui` serves it, and `_figure_html` turns a
+  Plotly figure into HTML an output shows;
+- in `src/ghcli/model.py`, each issue's creation date, `Issue.created_at`;
+- the `ghcli gui` command, which starts the app.
 
-## Mise en place de l'environnement de travail
+## Setting up the working environment
 
-Ouvrez le dépôt dans un Codespace, sur sa branche `shiny`&nbsp;: sur GitHub, sur la
-branche `shiny`, **Code** > **Codespaces** > **Create codespace on shiny**, ou [ce
-lien](https://codespaces.new/shuuchuu/ghcli/tree/shiny). Le Codespace installe les
-dépendances à sa création, dans le `.venv` du projet.
+This English version of the lab is the repository's `shiny-en` branch. Open it in a
+Codespace: on GitHub, on the `shiny-en` branch, **Code** > **Codespaces** > **Create
+codespace on shiny-en**, or [this
+link](https://codespaces.new/shuuchuu/ghcli/tree/shiny-en). The Codespace installs the
+dependencies when it is created, in the project's `.venv`.
 
-Dans un clone local de cette branche (`git clone -b shiny
-https://github.com/shuuchuu/ghcli.git`), installez
-[uv](https://docs.astral.sh/uv/getting-started/installation/), puis lancez `uv sync` à
-la racine du dépôt.
+In a local clone of that branch (`git clone -b shiny-en
+https://github.com/shuuchuu/ghcli.git`), install
+[uv](https://docs.astral.sh/uv/getting-started/installation/), then run `uv sync` at the
+root of the repository.
 
-`ghcli` a besoin d'un jeton GitHub&nbsp;: si vous n'en avez pas, créez un dépôt de test
-et un jeton comme l'explique [l'énoncé de l'interface en ligne de
-commande](https://github.com/shuuchuu/ghcli#un-dépôt-de-test-et-un-jeton-github), et
-mettez-le dans un fichier `creds.env` à la racine du dépôt. Les commandes se lancent
-dans un terminal à la racine du dépôt (**Terminal** > **Nouveau terminal** dans le
-Codespace), après `source creds.env`. `uv run ghcli gui` sert l'application à
-l'adresse `http://127.0.0.1:8000`&nbsp;: le Codespace propose de l'ouvrir dans le
-navigateur (**Open in Browser**, ou l'onglet **Ports**, à côté du terminal). `Ctrl+C`
-l'arrête, avant de la relancer après une modification. Les solutions sont sur la
-[branche `shiny-solution`](https://github.com/shuuchuu/ghcli/tree/shiny-solution) du
-dépôt.
+`ghcli` needs a GitHub token: if you don't have one, create a test repository and a
+token as [the command-line interface's
+instructions](https://github.com/shuuchuu/ghcli/tree/main-en#a-test-repository-and-a-github-token)
+explain, and put it in a `creds.env` file at the root of the repository. The commands
+run in a terminal at the root of the repository (**Terminal** > **New Terminal** in the
+Codespace), after `source creds.env`. `uv run ghcli gui` serves the app at
+`http://127.0.0.1:8000`: the Codespace offers to open it in the browser (**Open in
+Browser**, or the **Ports** tab, next to the terminal). `Ctrl+C` stops it, before
+starting it again after a change. The solutions are on the repository's
+[`shiny-solution-en` branch](https://github.com/shuuchuu/ghcli/tree/shiny-solution-en).
 
-## Récupérer les tickets au clic
+## Fetching the issues on a click
 
-Dans `serveur`, récupérez les tickets du dépôt (`liste_tickets`) à chaque clic sur le
-bouton, et seulement alors&nbsp;: pas à chaque lettre tapée dans les zones de texte.
-Gardez-les dans une valeur réactive, et faites afficher par la sortie `nombre` leur
-nombre, `3 ticket(s)`, ou un message d'erreur si l'API en renvoie une.
+In `server`, fetch the repository's issues (`list_issues`) on each click of the button,
+and only then: not on each letter typed in the text boxes. Keep them in a reactive
+value, and have the `count` output show their number, `3 issue(s)`, or an error message
+when the API returns one.
 
-**Documentation utile**
+**Useful documentation**
 
 - https://shiny.posit.co/py/api/core/reactive.value.html
 - https://shiny.posit.co/py/api/core/reactive.event.html
 
 <details>
-<summary>Conseils supplémentaires</summary>
+<summary>Additional hints</summary>
 
-`reactive.Value([])` est une valeur réactive, qui vaut d'abord une liste vide&nbsp;:
-`tickets()` la lit, `tickets.set(...)` la change, et les sorties qui l'ont lue se
-recalculent alors. Un effet décoré par `@reactive.event(entrees.recupere)` ne s'exécute
-qu'au clic sur le bouton `recupere`. Une sortie est une fonction de `serveur` décorée
-par `@render.text`, `@render.ui`…, du nom de son identifiant. Une deuxième valeur
-réactive peut garder le message d'erreur&nbsp;; `liste_tickets` lève une `niquests.HTTPError`
-pour un dépôt inconnu.
+`reactive.Value([])` is a reactive value, an empty list at first: `issues()` reads it,
+`issues.set(...)` changes it, and the outputs that read it are then computed again. An
+effect decorated with `@reactive.event(input.fetch)` runs only on a click of the
+`fetch` button. An output is a function of `server` decorated with `@render.text`,
+`@render.ui`…, named after its ID. A second reactive value can keep the error message;
+`list_issues` raises a `niquests.HTTPError` for an unknown repository.
 
 ```python
-def serveur(entrees: Inputs, sorties: Outputs, session: Session) -> None:
-    tickets: reactive.Value[list[Ticket]] = reactive.Value([])
-    erreur = reactive.Value("")
+def server(input: Inputs, output: Outputs, session: Session) -> None:  # ruff: ignore[builtin-argument-shadowing]
+    issues: reactive.Value[list[Issue]] = reactive.Value([])
+    error = reactive.Value("")
 
     @reactive.effect
-    @reactive.event(entrees.recupere)
-    def recupere() -> None:
+    @reactive.event(input.fetch)
+    def fetch() -> None:
         try:
-            tickets.set(liste_tickets(entrees.proprietaire(), entrees.depot()))
+            issues.set(list_issues(input.owner(), input.repo()))
             ...
         except HTTPError as exception:
             ...
 
     @render.text
-    def nombre() -> str:
-        return erreur() or ...
+    def count() -> str:
+        return error() or ...
 ```
 
 </details>
@@ -92,10 +89,10 @@ def serveur(entrees: Inputs, sorties: Outputs, session: Session) -> None:
 <details>
 <summary>Solution</summary>
 
-Les imports de `src/ghcli/gui.py`&nbsp;:
+The imports of `src/ghcli/gui.py`:
 
 ```python
-"""Interface web montrant quand les tickets d'un dépôt ont été ouverts, avec Shiny."""
+"""Web interface showing when a repository's issues were opened, with Shiny."""
 
 from collections import Counter
 from typing import TYPE_CHECKING
@@ -104,72 +101,72 @@ import plotly.graph_objects as go
 from niquests import HTTPError
 from shiny import App, Inputs, Outputs, Session, reactive, render, run_app, ui
 
-from .api import liste_tickets
+from .api import list_issues
 
 if TYPE_CHECKING:
-    from .modele import Ticket
+    from .model import Issue
 ```
 
-`serveur`, sans sa docstring&nbsp;:
+`server`, without its docstring:
 
 ```python
-def serveur(entrees: Inputs, sorties: Outputs, session: Session) -> None:
-    tickets: reactive.Value[list[Ticket]] = reactive.Value([])
-    erreur = reactive.Value("")
+def server(input: Inputs, output: Outputs, session: Session) -> None:  # ruff: ignore[builtin-argument-shadowing]
+    issues: reactive.Value[list[Issue]] = reactive.Value([])
+    error = reactive.Value("")
 
-    # S'exécute à chaque clic sur le bouton seulement, pas quand les entrées changent.
+    # Runs on each click of the button only, not when the inputs change.
     @reactive.effect
-    @reactive.event(entrees.recupere)
-    def recupere() -> None:
+    @reactive.event(input.fetch)
+    def fetch() -> None:
         try:
-            tickets.set(liste_tickets(entrees.proprietaire(), entrees.depot()))
-            erreur.set("")
+            issues.set(list_issues(input.owner(), input.repo()))
+            error.set("")
         except HTTPError as exception:
-            tickets.set([])
-            erreur.set(f"Impossible de lister les tickets : {exception}")
+            issues.set([])
+            error.set(f"Could not list the issues: {exception}")
 
-    # Les fonctions portent le nom des identifiants de leurs sorties.
+    # The functions are named after their outputs' IDs.
     @render.text
-    def nombre() -> str:
-        return erreur() or f"{len(tickets())} ticket(s)"
+    def count() -> str:
+        return error() or f"{len(issues())} issue(s)"
 ```
 
 </details>
 
-## Le diagramme
+## The chart
 
-Faites afficher par la sortie `graphique` un diagramme en barres du nombre de tickets
-ouverts chaque jour, avec Plotly&nbsp;: les jours en abscisse, dans l'ordre, et le nombre de
-tickets en ordonnée, avec un titre et le nom des axes. Sans ticket, la sortie n'affiche
-rien. Essayez avec un dépôt qui en a beaucoup, comme `octocat`/`Hello-World`.
+Have the `plot` output show a bar chart of the number of issues opened each day, with
+Plotly: the days on the x axis, in order, and the number of issues on the y axis, with
+a title and the axes' names. Without issues, the output shows nothing. Try it with a
+repository that has many, such as `octocat`/`Hello-World`.
 
-**Documentation utile**
+**Useful documentation**
 
-- https://docs.python.org/fr/3/library/collections.html#collections.Counter
+- https://docs.python.org/3/library/collections.html#collections.Counter
 - https://plotly.com/python/bar-charts/
 
 <details>
-<summary>Conseils supplémentaires</summary>
+<summary>Additional hints</summary>
 
-`ticket.date_creation.date()` est le jour de création d'un ticket, et un `Counter`
-compte ses éléments&nbsp;: `Counter(["a", "b", "a"])` vaut `Counter({"a": 2, "b": 1})`.
-`go.Figure(go.Bar(x=..., y=...))` est un diagramme en barres, et
-`figure.update_layout(title=..., xaxis_title=..., yaxis_title=...)` le titre. Une sortie
-`@render.ui` qui renvoie `None` n'affiche rien.
+`issue.created_at.date()` is the day an issue was created, and a `Counter` counts its
+elements: `Counter(["a", "b", "a"])` is `Counter({"a": 2, "b": 1})`.
+`go.Figure(go.Bar(x=..., y=...))` is a bar chart, and
+`figure.update_layout(title=..., xaxis_title=..., yaxis_title=...)` titles it. A
+`@render.ui` output that returns `None` shows nothing.
 
 ```python
-def serveur(entrees: Inputs, sorties: Outputs, session: Session) -> None:
+def server(input: Inputs, output: Outputs, session: Session) -> None:  # ruff: ignore[builtin-argument-shadowing]
     ...
 
     @render.ui
-    def graphique() -> ui.HTML | None:
-        if not tickets():
+    def plot() -> ui.HTML | None:
+        if not issues():
             return None
-        par_jour = Counter(ticket.date_creation.date() for ticket in tickets())
-        jours = sorted(par_jour)
-        figure = go.Figure(go.Bar(x=jours, y=...))
+        per_day = Counter(issue.created_at.date() for issue in issues())
+        days = sorted(per_day)
+        figure = go.Figure(go.Bar(x=days, y=...))
         ...
-        return _convertit_en_html(figure)
+        return _figure_html(figure)
 ```
 
 </details>
@@ -177,48 +174,47 @@ def serveur(entrees: Inputs, sorties: Outputs, session: Session) -> None:
 <details>
 <summary>Solution</summary>
 
-`serveur`&nbsp;:
+`server`:
 
 ```python
-def serveur(entrees: Inputs, sorties: Outputs, session: Session) -> None:
-    """Calcule les sorties à partir des entrées.
+def server(input: Inputs, output: Outputs, session: Session) -> None:  # ruff: ignore[builtin-argument-shadowing]
+    """Compute the outputs from the inputs.
 
     Args:
-        entrees: Les entrées, par identifiant : `entrees.proprietaire()` est le
-            propriétaire saisi.
-        sorties: Les sorties (inutilisées : les décorateurs `render` les enregistrent).
-        session: La session du navigateur (inutilisée).
+        input: The inputs, by ID: `input.owner()` is the owner typed in.
+        output: The outputs (unused: the `render` decorators register them).
+        session: The browser's session (unused).
     """
-    tickets: reactive.Value[list[Ticket]] = reactive.Value([])
-    erreur = reactive.Value("")
+    issues: reactive.Value[list[Issue]] = reactive.Value([])
+    error = reactive.Value("")
 
-    # S'exécute à chaque clic sur le bouton seulement, pas quand les entrées changent.
+    # Runs on each click of the button only, not when the inputs change.
     @reactive.effect
-    @reactive.event(entrees.recupere)
-    def recupere() -> None:
+    @reactive.event(input.fetch)
+    def fetch() -> None:
         try:
-            tickets.set(liste_tickets(entrees.proprietaire(), entrees.depot()))
-            erreur.set("")
+            issues.set(list_issues(input.owner(), input.repo()))
+            error.set("")
         except HTTPError as exception:
-            tickets.set([])
-            erreur.set(f"Impossible de lister les tickets : {exception}")
+            issues.set([])
+            error.set(f"Could not list the issues: {exception}")
 
-    # Les fonctions portent le nom des identifiants de leurs sorties.
+    # The functions are named after their outputs' IDs.
     @render.text
-    def nombre() -> str:
-        return erreur() or f"{len(tickets())} ticket(s)"
+    def count() -> str:
+        return error() or f"{len(issues())} issue(s)"
 
     @render.ui
-    def graphique() -> ui.HTML | None:
-        if not tickets():
+    def plot() -> ui.HTML | None:
+        if not issues():
             return None
-        par_jour = Counter(ticket.date_creation.date() for ticket in tickets())
-        jours = sorted(par_jour)
-        figure = go.Figure(go.Bar(x=jours, y=[par_jour[jour] for jour in jours]))
+        per_day = Counter(issue.created_at.date() for issue in issues())
+        days = sorted(per_day)
+        figure = go.Figure(go.Bar(x=days, y=[per_day[day] for day in days]))
         figure.update_layout(
-            title="Tickets ouverts par jour", xaxis_title="Jour", yaxis_title="Tickets"
+            title="Issues opened per day", xaxis_title="Day", yaxis_title="Issues"
         )
-        return _convertit_en_html(figure)
+        return _figure_html(figure)
 ```
 
 </details>
