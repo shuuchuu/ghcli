@@ -4,6 +4,8 @@ authors = [
 ]
 dependencies = [
   "niquests >= 3.21, < 4",
+  "shiny >= 1, < 2",
+  "plotly >= 6, < 8",
   "rich >= 15, < 16",
   "typer >= 0.27, < 1",
 ]
