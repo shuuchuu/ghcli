@@ -7,7 +7,14 @@
   },
   // Features to add to the dev container. More info: https://containers.dev/features.
   // Use 'forwardPorts' to make a list of ports inside the container available locally.
-  // "forwardPorts": [],
+  // L'interface web de `ghcli gui`.
+  "forwardPorts": [7860],
+  "portsAttributes": {
+    "7860": {
+      "label": "Gradio",
+      "onAutoForward": "openBrowser"
+    }
+  },
   // Use 'postCreateCommand' to run commands after the container is created.
   "postCreateCommand": "uv sync --all-extras",
   // Configure tool-specific properties.
