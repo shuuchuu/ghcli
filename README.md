@@ -78,22 +78,22 @@ run ghcli`, sans argument, et `uv run ghcli --help`&nbsp;?
 <details>
 <summary>Conseils supplémentaires</summary>
 
-Une commande se déclare dans la table `[project.scripts]` de `pyproject.toml`&nbsp;: son
-nom, puis le module et la fonction qu'elle appelle, séparés par `:`. Un argument
-positionnel est un nom sans tirets&nbsp;: `parser.add_argument("owner", help="...")`.
-`parse_args()` renvoie un objet dont chaque argument est un attribut (`args.owner`).
-Sans argument, `argparse` affiche l'usage et une erreur&nbsp;; avec `--help`, l'aide
-qu'il génère des `help=`.
+Une commande se déclare dans la table `[project.scripts]` de `pyproject.toml`&nbsp;: son nom,
+puis le module et la fonction qu'elle appelle, séparés par `:`. Un argument positionnel
+est un nom sans tirets&nbsp;: `parseur.add_argument("proprietaire", help="...")`.
+`parse_args()` renvoie un objet dont chaque argument est un attribut
+(`args.proprietaire`). Sans argument, `argparse` affiche l'usage et une erreur&nbsp;; avec
+`--help`, l'aide qu'il génère des `help=`.
 
 ```python
 import argparse
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="List GitHub issues.")
-    parser.add_argument("owner", help="owner of the GitHub repository")
+    parseur = argparse.ArgumentParser(description="Liste les tickets GitHub.")
+    parseur.add_argument("proprietaire", help="propriétaire du dépôt GitHub")
     ...
-    args = parser.parse_args()
+    args = parseur.parse_args()
     print(...)
 ```
 
@@ -110,18 +110,18 @@ ghcli = "ghcli....:..."
 `src/ghcli/cli.py`&nbsp;:
 
 ```python
-"""Command-line interface to GitHub issues."""
+"""Interface en ligne de commande pour les tickets GitHub."""
 
 import argparse
 
 
 def main() -> None:
-    """Read a GitHub repository from the arguments."""
-    parser = argparse.ArgumentParser(description="List GitHub issues.")
-    parser.add_argument("owner", help="owner of the GitHub repository")
-    parser.add_argument("repo", help="name of the GitHub repository")
-    args = parser.parse_args()
-    print(args.owner, args.repo)
+    """Lit un dépôt GitHub dans les arguments."""
+    parseur = argparse.ArgumentParser(description="Liste les tickets GitHub.")
+    parseur.add_argument("proprietaire", help="propriétaire du dépôt GitHub")
+    parseur.add_argument("depot", help="nom du dépôt GitHub")
+    args = parseur.parse_args()
+    print(args.proprietaire, args.depot)
 ```
 
 `pyproject.toml`, à la suite de la table `[project]`&nbsp;:
@@ -145,19 +145,19 @@ uv run ghcli --help
 ## Le jeton, depuis une variable d'environnement
 
 Créez le module `src/ghcli/api.py`, qui contiendra la logique du logiciel&nbsp;: les
-appels à l'API de GitHub. Écrivez-y une fonction `_get_token() -> str` qui renvoie la
+appels à l'API de GitHub. Écrivez-y une fonction `_lit_jeton() -> str` qui renvoie la
 valeur de la variable d'environnement `GHCLI_TOKEN`. Quand elle n'est pas définie, ou
 qu'elle est vide, la fonction affiche sur la sortie d'erreur ce message, puis arrête le
 programme avec le code de retour `1`&nbsp;:
 
 ```text
-Unable to read the GitHub token from the GHCLI_TOKEN environment variable. Define it and
-run the program again.
+Impossible de lire le jeton GitHub dans la variable d'environnement GHCLI_TOKEN.
+Définissez-la et relancez le programme.
 ```
 
 Essayez-la avec une fausse valeur, pour que le vrai jeton n'apparaisse jamais à
-l'écran&nbsp;: `GHCLI_TOKEN=essai uv run python -c "from ghcli.api import _get_token;
-print(_get_token())"`, puis sans la variable&nbsp;: `env -u GHCLI_TOKEN uv run python -c
+l'écran&nbsp;: `GHCLI_TOKEN=essai uv run python -c "from ghcli.api import _lit_jeton;
+print(_lit_jeton())"`, puis sans la variable&nbsp;: `env -u GHCLI_TOKEN uv run python -c
 "..."`.
 
 **Documentation utile**
@@ -169,7 +169,7 @@ print(_get_token())"`, puis sans la variable&nbsp;: `env -u GHCLI_TOKEN uv run p
 <summary>Conseils supplémentaires</summary>
 
 `os.environ.get("GHCLI_TOKEN")` renvoie la valeur de la variable, ou `None` quand elle
-n'est pas définie&nbsp;: `if not token` couvre l'absence et la valeur vide. `print(...,
+n'est pas définie&nbsp;: `if not jeton` couvre l'absence et la valeur vide. `print(...,
 file=sys.stderr)` écrit sur la sortie d'erreur.
 
 ```python
@@ -177,12 +177,12 @@ import os
 import sys
 
 
-def _get_token() -> str:
-    token = os.environ.get(...)
-    if not token:
+def _lit_jeton() -> str:
+    jeton = os.environ.get(...)
+    if not jeton:
         print(..., file=sys.stderr)
         sys.exit(...)
-    return token
+    return jeton
 ```
 
 </details>
@@ -193,27 +193,27 @@ def _get_token() -> str:
 `src/ghcli/api.py`&nbsp;:
 
 ```python
-"""Calls to the GitHub API."""
+"""Appels à l'API de GitHub."""
 
 import os
 import sys
 
 
-def _get_token() -> str:
-    token = os.environ.get("GHCLI_TOKEN")
-    if not token:
+def _lit_jeton() -> str:
+    jeton = os.environ.get("GHCLI_TOKEN")
+    if not jeton:
         print(
-            "Unable to read the GitHub token from the GHCLI_TOKEN environment "
-            "variable. Define it and run the program again.",
+            "Impossible de lire le jeton GitHub dans la variable d'environnement "
+            "GHCLI_TOKEN. Définissez-la et relancez le programme.",
             file=sys.stderr,
         )
         sys.exit(1)
-    return token
+    return jeton
 ```
 
 ```console
-GHCLI_TOKEN=essai uv run python -c "from ghcli.api import _get_token; print(_get_token())"
-env -u GHCLI_TOKEN uv run python -c "from ghcli.api import _get_token; print(_get_token())" || echo "(code de retour non nul)"
+GHCLI_TOKEN=essai uv run python -c "from ghcli.api import _lit_jeton; print(_lit_jeton())"
+env -u GHCLI_TOKEN uv run python -c "from ghcli.api import _lit_jeton; print(_lit_jeton())" || echo "(code de retour non nul)"
 ```
 
 </details>
@@ -222,30 +222,30 @@ env -u GHCLI_TOKEN uv run python -c "from ghcli.api import _get_token; print(_ge
 
 Ajoutez au projet la bibliothèque [`niquests`](https://niquests.readthedocs.io/), qui a
 l'interface de `requests`, en plus moderne (`uv add niquests`). Écrivez dans `api.py`
-une fonction `list_issues(owner: str, repo: str) -> list[tuple[str, str, str]]` qui
-renvoie les tickets ouverts du dépôt, une liste de n-uplets `(titre, corps, url)`, et
-faites afficher à `main` une ligne par ticket, `url - titre - corps`. Pourquoi mettre
-cette fonction dans `api.py`, et ne garder dans `cli.py` que la lecture des
+une fonction `liste_tickets(proprietaire: str, depot: str) -> list[tuple[str, str,
+str]]` qui renvoie les tickets ouverts du dépôt, une liste de n-uplets `(titre, corps,
+url)`, et faites afficher à `main` une ligne par ticket, `url - titre - corps`. Pourquoi
+mettre cette fonction dans `api.py`, et ne garder dans `cli.py` que la lecture des
 arguments&nbsp;?
 
 La fonction demande ces tickets à l'API de GitHub&nbsp;:
 
 ```python
-response = niquests.get(
-    f"https://api.github.com/repos/{owner}/{repo}/issues",
+reponse = niquests.get(
+    f"https://api.github.com/repos/{proprietaire}/{depot}/issues",
     headers=...,
     timeout=10,
 )
 ```
 
-puis lit la réponse, la liste des tickets en JSON&nbsp;: `response.json()`. Trois points
+puis lit la réponse, la liste des tickets en JSON&nbsp;: `reponse.json()`. Trois points
 demandent votre attention&nbsp;:
 
 - Les en-têtes&nbsp;: `Accept` vaut `application/vnd.github+json`&nbsp;; `Authorization`
   vaut `Bearer <jeton>`, seulement si `GHCLI_TOKEN` a une valeur. Sans cet en-tête,
   l'API répond aux lectures d'un dépôt public, alors qu'elle refuse un `Bearer` sans
   jeton.
-- Les *pull requests*&nbsp;: pour l'API, ce sont des tickets. `list_issues` ne doit
+- Les *pull requests*&nbsp;: pour l'API, ce sont des tickets. `liste_tickets` ne doit
   renvoyer que les vrais tickets.
 - La pagination&nbsp;: l'API répond par pages de 30 éléments. Demandez-en 100, le
   maximum, et ne cherchez pas à aller plus loin.
@@ -272,35 +272,35 @@ ghcli-sandbox`. Que se passe-t-il pour un dépôt qui n'existe pas&nbsp;?
 <details>
 <summary>Conseils supplémentaires</summary>
 
-Dans le paquet, `from .api import list_issues` importe la fonction du module voisin.
+Dans le paquet, `from .api import liste_tickets` importe la fonction du module voisin.
 Chaque ticket est un dictionnaire, dont les clés `title`, `body` et `html_url` (l'URL de
 sa page, quand `url` est celle de l'API) donnent ce qu'on veut&nbsp;; `body` vaut `None`
 pour un ticket sans corps. Une *pull request* est un élément qui a une clé
 `pull_request`. `params={"per_page": "100"}` ajoute `?per_page=100` à l'URL&nbsp;;
 au-delà, il faudrait suivre l'en-tête `Link` de la réponse.
-`response.raise_for_status()` lève une `niquests.HTTPError` quand l'API répond par une
+`reponse.raise_for_status()` lève une `niquests.HTTPError` quand l'API répond par une
 erreur, `404` pour un dépôt inconnu, `401` pour un jeton invalide. Une fonction
-`_headers(token: str | None)` construit les en-têtes avec ou sans jeton, et resservira à
-`create_issue`.
+`_entetes(jeton: str | None)` construit les en-têtes avec ou sans jeton, et resservira à
+`cree_ticket`.
 
 `cli.py` ne garde que la lecture des arguments&nbsp;: la logique se teste alors sans
 parseur (étape « Des tests »), et ne change pas quand le parseur change (étape « `Typer`
 et `Rich` »).
 
 ```python
-def _headers(token: str | None) -> dict[str, str]:
-    headers = {"Accept": ...}
-    if token:
-        headers["Authorization"] = ...
-    return headers
+def _entetes(jeton: str | None) -> dict[str, str]:
+    entetes = {"Accept": ...}
+    if jeton:
+        entetes["Authorization"] = ...
+    return entetes
 
 
-def list_issues(owner: str, repo: str) -> list[tuple[str, str, str]]:
-    response = niquests.get(
-        ..., params=..., headers=_headers(os.environ.get(...)), timeout=10
+def liste_tickets(proprietaire: str, depot: str) -> list[tuple[str, str, str]]:
+    reponse = niquests.get(
+        ..., params=..., headers=_entetes(os.environ.get(...)), timeout=10
     )
-    response.raise_for_status()
-    return [(issue["title"], ..., ...) for issue in response.json() if ...]
+    reponse.raise_for_status()
+    return [(ticket["title"], ..., ...) for ticket in reponse.json() if ...]
 ```
 
 </details>
@@ -311,104 +311,104 @@ def list_issues(owner: str, repo: str) -> list[tuple[str, str, str]]:
 `src/ghcli/api.py`&nbsp;:
 
 ```python
-"""Calls to the GitHub API."""
+"""Appels à l'API de GitHub."""
 
 import os
 import sys
 
 import niquests
 
-API_URL = "https://api.github.com"
+URL_API = "https://api.github.com"
 
 
-def _get_token() -> str:
-    token = os.environ.get("GHCLI_TOKEN")
-    if not token:
+def _lit_jeton() -> str:
+    jeton = os.environ.get("GHCLI_TOKEN")
+    if not jeton:
         print(
-            "Unable to read the GitHub token from the GHCLI_TOKEN environment "
-            "variable. Define it and run the program again.",
+            "Impossible de lire le jeton GitHub dans la variable d'environnement "
+            "GHCLI_TOKEN. Définissez-la et relancez le programme.",
             file=sys.stderr,
         )
         sys.exit(1)
-    return token
+    return jeton
 
 
-def _headers(token: str | None) -> dict[str, str]:
-    headers = {"Accept": "application/vnd.github+json"}
-    # Without a token, the API still answers reads of public repositories.
-    if token:
-        headers["Authorization"] = f"Bearer {token}"
-    return headers
+def _entetes(jeton: str | None) -> dict[str, str]:
+    entetes = {"Accept": "application/vnd.github+json"}
+    # Sans jeton, l'API répond tout de même aux lectures des dépôts publics.
+    if jeton:
+        entetes["Authorization"] = f"Bearer {jeton}"
+    return entetes
 
 
-def list_issues(owner: str, repo: str) -> list[tuple[str, str, str]]:
-    """List the open issues among the 100 latest of a GitHub repository.
+def liste_tickets(proprietaire: str, depot: str) -> list[tuple[str, str, str]]:
+    """Liste les tickets ouverts parmi les 100 derniers d'un dépôt GitHub.
 
     Args:
-        owner: The repository's owner.
-        repo: The repository's name.
+        proprietaire: Le propriétaire du dépôt.
+        depot: Le nom du dépôt.
 
     Returns:
-        The title, body and URL of each issue, without the pull requests.
+        Le titre, le corps et l'URL de chaque ticket, sans les pull requests.
     """
     # https://docs.github.com/en/rest/issues/issues#list-repository-issues
-    response = niquests.get(
-        f"{API_URL}/repos/{owner}/{repo}/issues",
+    reponse = niquests.get(
+        f"{URL_API}/repos/{proprietaire}/{depot}/issues",
         params={"per_page": "100"},
-        headers=_headers(os.environ.get("GHCLI_TOKEN")),
+        headers=_entetes(os.environ.get("GHCLI_TOKEN")),
         timeout=10,
     )
-    # An error status (404 for an unknown repository, 401 for a bad token)
-    # raises niquests.HTTPError.
-    response.raise_for_status()
-    # The API counts pull requests as issues, and an issue's body is null when it
-    # has none.
+    # Un statut d'erreur (404 pour un dépôt inconnu, 401 pour un jeton invalide)
+    # lève niquests.HTTPError.
+    reponse.raise_for_status()
+    # L'API compte les pull requests parmi les tickets, et le corps d'un ticket vaut
+    # null quand il n'en a pas.
     return [
-        (issue["title"], issue["body"] or "", issue["html_url"])
-        for issue in response.json()
-        if "pull_request" not in issue
+        (ticket["title"], ticket["body"] or "", ticket["html_url"])
+        for ticket in reponse.json()
+        if "pull_request" not in ticket
     ]
 ```
 
 `src/ghcli/cli.py`&nbsp;:
 
 ```python
-"""Command-line interface to GitHub issues."""
+"""Interface en ligne de commande pour les tickets GitHub."""
 
 import argparse
 
-from .api import list_issues
+from .api import liste_tickets
 
 
 def main() -> None:
-    """List the issues of the GitHub repository the arguments name."""
-    parser = argparse.ArgumentParser(description="List GitHub issues.")
-    parser.add_argument("owner", help="owner of the GitHub repository")
-    parser.add_argument("repo", help="name of the GitHub repository")
-    args = parser.parse_args()
-    for title, body, url in list_issues(args.owner, args.repo):
-        print(f"{url} - {title} - {body}")
+    """Liste les tickets du dépôt GitHub que nomment les arguments."""
+    parseur = argparse.ArgumentParser(description="Liste les tickets GitHub.")
+    parseur.add_argument("proprietaire", help="propriétaire du dépôt GitHub")
+    parseur.add_argument("depot", help="nom du dépôt GitHub")
+    args = parseur.parse_args()
+    for titre, corps, url in liste_tickets(args.proprietaire, args.depot):
+        print(f"{url} - {titre} - {corps}")
 ```
 
 ```console
 uv add niquests
 uv run ghcli shuuchuu ghcli
-uv run ghcli shuuchuu no-such-repository || echo "(code de retour non nul)"
+uv run ghcli shuuchuu depot-inexistant || echo "(code de retour non nul)"
 ```
 
 </details>
 
 ## Créer un ticket&nbsp;: deux commandes
 
-Ajoutez à `api.py` une fonction `create_issue(owner: str, repo: str, title: str, body:
-str) -> tuple[str, str, str]`, qui crée un ticket et renvoie son titre, son corps et son
-URL. Elle envoie à l'API le titre et le corps du ticket, en JSON, et a besoin du
+Ajoutez à `api.py` une fonction `cree_ticket(proprietaire: str, depot: str, titre: str,
+corps: str) -> tuple[str, str, str]`, qui crée un ticket et renvoie son titre, son corps
+et son URL. Elle envoie à l'API le titre et le corps du ticket, en JSON, et a besoin du
 jeton&nbsp;:
 
 ```python
-response = niquests.post(
-    f"https://api.github.com/repos/{owner}/{repo}/issues",
-    json={"title": title, "body": body},
+reponse = niquests.post(
+    f"https://api.github.com/repos/{proprietaire}/{depot}/issues",
+    json={"title": titre, "body": corps},
     headers=...,
     timeout=10,
 )
@@ -421,9 +421,9 @@ listez-le.
 
 Un dépôt inconnu finit pour l'instant sur une trace Python. Une interface en ligne de
 commande répond par un message et un code de sortie, comme vient de le faire
-`_get_token`&nbsp;: faites que `main` attrape `niquests.HTTPError`, écrive une ligne sur
+`_lit_jeton`&nbsp;: faites que `main` attrape `niquests.HTTPError`, écrive une ligne sur
 la sortie d'erreur et s'arrête avec le code `1`. Essayez avec `uv run ghcli list
-shuuchuu no-such-repository`.
+shuuchuu depot-inexistant`.
 
 **Documentation utile**
 
@@ -433,29 +433,29 @@ shuuchuu no-such-repository`.
 <details>
 <summary>Conseils supplémentaires</summary>
 
-`parser.add_subparsers(dest="command", required=True)` renvoie un objet dont
-`add_parser("list")` crée le parseur de la sous-commande&nbsp;; `args.command` dit
-laquelle a été lancée. Les deux sous-commandes ont `owner` et `repo` en commun&nbsp;:
+`parseur.add_subparsers(dest="commande", required=True)` renvoie un objet dont
+`add_parser("list")` crée le parseur de la sous-commande&nbsp;; `args.commande` dit
+laquelle a été lancée. Les deux sous-commandes ont `proprietaire` et `depot` en commun&nbsp;:
 une boucle les leur ajoute. L'API répond `201 Created` avec le ticket créé, au même
-format qu'un ticket de la liste. `headers=_headers(_get_token())` exige le jeton&nbsp;:
-sans lui, `create` s'arrête sur le message de `_get_token`.
+format qu'un ticket de la liste. `headers=_entetes(_lit_jeton())` exige le jeton&nbsp;:
+sans lui, `create` s'arrête sur le message de `_lit_jeton`.
 
 ```python
-subparsers = parser.add_subparsers(dest="command", required=True)
-list_parser = subparsers.add_parser("list", help="list a repository's issues")
-create_parser = subparsers.add_parser("create", help="create an issue")
-for subparser in (list_parser, create_parser):
-    subparser.add_argument("owner", help="owner of the GitHub repository")
+sous_parseurs = parseur.add_subparsers(dest="commande", required=True)
+parseur_liste = sous_parseurs.add_parser("list", help="liste les tickets d'un dépôt")
+parseur_creation = sous_parseurs.add_parser("create", help="crée un ticket")
+for sous_parseur in (parseur_liste, parseur_creation):
+    sous_parseur.add_argument("proprietaire", help="propriétaire du dépôt GitHub")
     ...
-create_parser.add_argument("title", help="title of the issue")
+parseur_creation.add_argument("titre", help="titre du ticket")
 ...
-args = parser.parse_args()
+args = parseur.parse_args()
 try:
-    if args.command == "list":
+    if args.commande == "list":
         ...
-    elif args.command == "create":
+    elif args.commande == "create":
         ...
-except niquests.HTTPError as error:
+except niquests.HTTPError as erreur:
     print(..., file=sys.stderr)
     sys.exit(...)
 ```
@@ -468,134 +468,138 @@ except niquests.HTTPError as error:
 `src/ghcli/api.py`&nbsp;:
 
 ```python
-"""Calls to the GitHub API."""
+"""Appels à l'API de GitHub."""
 
 import os
 import sys
 
 import niquests
 
-API_URL = "https://api.github.com"
+URL_API = "https://api.github.com"
 
 
-def _get_token() -> str:
-    token = os.environ.get("GHCLI_TOKEN")
-    if not token:
+def _lit_jeton() -> str:
+    jeton = os.environ.get("GHCLI_TOKEN")
+    if not jeton:
         print(
-            "Unable to read the GitHub token from the GHCLI_TOKEN environment "
-            "variable. Define it and run the program again.",
+            "Impossible de lire le jeton GitHub dans la variable d'environnement "
+            "GHCLI_TOKEN. Définissez-la et relancez le programme.",
             file=sys.stderr,
         )
         sys.exit(1)
-    return token
+    return jeton
 
 
-def _headers(token: str | None) -> dict[str, str]:
-    headers = {"Accept": "application/vnd.github+json"}
-    # Without a token, the API still answers reads of public repositories.
-    if token:
-        headers["Authorization"] = f"Bearer {token}"
-    return headers
+def _entetes(jeton: str | None) -> dict[str, str]:
+    entetes = {"Accept": "application/vnd.github+json"}
+    # Sans jeton, l'API répond tout de même aux lectures des dépôts publics.
+    if jeton:
+        entetes["Authorization"] = f"Bearer {jeton}"
+    return entetes
 
 
-def list_issues(owner: str, repo: str) -> list[tuple[str, str, str]]:
-    """List the open issues among the 100 latest of a GitHub repository.
+def liste_tickets(proprietaire: str, depot: str) -> list[tuple[str, str, str]]:
+    """Liste les tickets ouverts parmi les 100 derniers d'un dépôt GitHub.
 
     Args:
-        owner: The repository's owner.
-        repo: The repository's name.
+        proprietaire: Le propriétaire du dépôt.
+        depot: Le nom du dépôt.
 
     Returns:
-        The title, body and URL of each issue, without the pull requests.
+        Le titre, le corps et l'URL de chaque ticket, sans les pull requests.
     """
     # https://docs.github.com/en/rest/issues/issues#list-repository-issues
-    response = niquests.get(
-        f"{API_URL}/repos/{owner}/{repo}/issues",
+    reponse = niquests.get(
+        f"{URL_API}/repos/{proprietaire}/{depot}/issues",
         params={"per_page": "100"},
-        headers=_headers(os.environ.get("GHCLI_TOKEN")),
+        headers=_entetes(os.environ.get("GHCLI_TOKEN")),
         timeout=10,
     )
-    # An error status (404 for an unknown repository, 401 for a bad token)
-    # raises niquests.HTTPError.
-    response.raise_for_status()
-    # The API counts pull requests as issues, and an issue's body is null when it
-    # has none.
+    # Un statut d'erreur (404 pour un dépôt inconnu, 401 pour un jeton invalide)
+    # lève niquests.HTTPError.
+    reponse.raise_for_status()
+    # L'API compte les pull requests parmi les tickets, et le corps d'un ticket vaut
+    # null quand il n'en a pas.
     return [
-        (issue["title"], issue["body"] or "", issue["html_url"])
-        for issue in response.json()
-        if "pull_request" not in issue
+        (ticket["title"], ticket["body"] or "", ticket["html_url"])
+        for ticket in reponse.json()
+        if "pull_request" not in ticket
     ]
 
 
-def create_issue(owner: str, repo: str, title: str, body: str) -> tuple[str, str, str]:
-    """Create an issue in a GitHub repository.
+def cree_ticket(
+    proprietaire: str, depot: str, titre: str, corps: str
+) -> tuple[str, str, str]:
+    """Crée un ticket dans un dépôt GitHub.
 
     Args:
-        owner: The repository's owner.
-        repo: The repository's name.
-        title: The issue's title.
-        body: The issue's body.
+        proprietaire: Le propriétaire du dépôt.
+        depot: Le nom du dépôt.
+        titre: Le titre du ticket.
+        corps: Le corps du ticket.
 
     Returns:
-        The title, body and URL of the created issue.
+        Le titre, le corps et l'URL du ticket créé.
     """
     # https://docs.github.com/en/rest/issues/issues#create-an-issue
-    response = niquests.post(
-        f"{API_URL}/repos/{owner}/{repo}/issues",
-        json={"title": title, "body": body},
-        headers=_headers(_get_token()),
+    reponse = niquests.post(
+        f"{URL_API}/repos/{proprietaire}/{depot}/issues",
+        json={"title": titre, "body": corps},
+        headers=_entetes(_lit_jeton()),
         timeout=10,
     )
-    response.raise_for_status()
-    issue = response.json()
-    return issue["title"], issue["body"] or "", issue["html_url"]
+    reponse.raise_for_status()
+    ticket = reponse.json()
+    return ticket["title"], ticket["body"] or "", ticket["html_url"]
 ```
 
 `src/ghcli/cli.py`&nbsp;:
 
 ```python
-"""Command-line interface to GitHub issues."""
+"""Interface en ligne de commande pour les tickets GitHub."""
 
 import argparse
 import sys
 
 import niquests
 
-from .api import create_issue, list_issues
+from .api import cree_ticket, liste_tickets
 
 
-def _create_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="List and create GitHub issues.")
-    subparsers = parser.add_subparsers(dest="command", required=True)
-    list_parser = subparsers.add_parser("list", help="list a repository's issues")
-    create_parser = subparsers.add_parser("create", help="create an issue")
-    for subparser in (list_parser, create_parser):
-        subparser.add_argument("owner", help="owner of the GitHub repository")
-        subparser.add_argument("repo", help="name of the GitHub repository")
-    create_parser.add_argument("title", help="title of the issue")
-    create_parser.add_argument("body", help="body of the issue")
-    return parser
+def _cree_parseur() -> argparse.ArgumentParser:
+    parseur = argparse.ArgumentParser(description="Liste et crée les tickets GitHub.")
+    sous_parseurs = parseur.add_subparsers(dest="commande", required=True)
+    parseur_liste = sous_parseurs.add_parser(
+        "list", help="liste les tickets d'un dépôt"
+    )
+    parseur_creation = sous_parseurs.add_parser("create", help="crée un ticket")
+    for sous_parseur in (parseur_liste, parseur_creation):
+        sous_parseur.add_argument("proprietaire", help="propriétaire du dépôt GitHub")
+        sous_parseur.add_argument("depot", help="nom du dépôt GitHub")
+    parseur_creation.add_argument("titre", help="titre du ticket")
+    parseur_creation.add_argument("corps", help="corps du ticket")
+    return parseur
 
 
 def main() -> None:
-    """Run the command the arguments name."""
-    args = _create_parser().parse_args()
+    """Exécute la commande que nomment les arguments."""
+    args = _cree_parseur().parse_args()
     try:
-        if args.command == "list":
-            for title, body, url in list_issues(args.owner, args.repo):
-                print(f"{url} - {title} - {body}")
-        elif args.command == "create":
-            title, body, url = create_issue(
-                args.owner, args.repo, args.title, args.body
+        if args.commande == "list":
+            for titre, corps, url in liste_tickets(args.proprietaire, args.depot):
+                print(f"{url} - {titre} - {corps}")
+        elif args.commande == "create":
+            titre, corps, url = cree_ticket(
+                args.proprietaire, args.depot, args.titre, args.corps
             )
-            print(f"{url} - {title} - {body}")
-    except niquests.HTTPError as error:
-        print(f"GitHub API error: {error}", file=sys.stderr)
+            print(f"{url} - {titre} - {corps}")
+    except niquests.HTTPError as erreur:
+        print(f"Erreur de l'API GitHub : {erreur}", file=sys.stderr)
         sys.exit(1)
 ```
 
 ```console
-uv run ghcli list shuuchuu no-such-repository || echo "(code de retour non nul)"
+uv run ghcli list shuuchuu depot-inexistant || echo "(code de retour non nul)"
 uv run ghcli create <votre utilisateur> ghcli-sandbox "Premier ticket" "Créé par ghcli"
 uv run ghcli list <votre utilisateur> ghcli-sandbox
 ```
@@ -605,11 +609,11 @@ uv run ghcli list <votre utilisateur> ghcli-sandbox
 ## Une classe pour les tickets
 
 Des n-uplets représentent pour l'instant les tickets&nbsp;: il est facile d'en confondre
-l'ordre, et d'introduire ainsi des bugs. Créez dans un module `src/ghcli/model.py` une
-classe `Issue`, avec le module `dataclasses`, dont les attributs sont le titre, le corps
-et l'URL d'un ticket, et une méthode de classe `from_dict` qui construit un `Issue` à
-partir d'un ticket de l'API. `list_issues` renvoie alors une `list[Issue]`,
-`create_issue` un `Issue`&nbsp;: adaptez-les, ainsi que `cli.py`.
+l'ordre, et d'introduire ainsi des bugs. Créez dans un module `src/ghcli/modele.py` une
+classe `Ticket`, avec le module `dataclasses`, dont les attributs sont le titre, le
+corps et l'URL d'un ticket, et une méthode de classe `depuis_dict` qui construit un
+`Ticket` à partir d'un ticket de l'API. `liste_tickets` renvoie alors une
+`list[Ticket]`, `cree_ticket` un `Ticket`&nbsp;: adaptez-les, ainsi que `cli.py`.
 
 **Documentation utile**
 
@@ -621,7 +625,7 @@ partir d'un ticket de l'API. `list_issues` renvoie alors une `list[Issue]`,
 
 `@dataclass` génère le constructeur, la représentation et la comparaison à partir des
 attributs annotés. Une méthode de classe reçoit la classe (`cls`) au lieu d'une
-instance&nbsp;: c'est un autre constructeur, `Issue.from_dict(issue)`.
+instance&nbsp;: c'est un autre constructeur, `Ticket.depuis_dict(ticket)`.
 
 ```python
 from dataclasses import dataclass
@@ -629,13 +633,13 @@ from typing import Any, Self
 
 
 @dataclass
-class Issue:
-    title: str
+class Ticket:
+    titre: str
     ...
 
     @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> Self:
-        return cls(title=data["title"], body=..., url=...)
+    def depuis_dict(cls, donnees: dict[str, Any]) -> Self:
+        return cls(titre=donnees["title"], corps=..., url=...)
 ```
 
 </details>
@@ -643,165 +647,169 @@ class Issue:
 <details>
 <summary>Solution</summary>
 
-`src/ghcli/model.py`&nbsp;:
+`src/ghcli/modele.py`&nbsp;:
 
 ```python
-"""The issues the CLI handles."""
+"""Les tickets que manipule l'interface en ligne de commande."""
 
 from dataclasses import dataclass
 from typing import Any, Self
 
 
 @dataclass
-class Issue:
-    """A GitHub issue, reduced to what the CLI shows."""
+class Ticket:
+    """Un ticket GitHub, réduit à ce que montre l'interface en ligne de commande."""
 
-    title: str
-    body: str
+    titre: str
+    corps: str
     url: str
 
     @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> Self:
-        """Build an issue from a dictionary of the GitHub API.
+    def depuis_dict(cls, donnees: dict[str, Any]) -> Self:
+        """Construit un ticket depuis un dictionnaire de l'API GitHub.
 
         Args:
-            data: An issue, as the API returns it.
+            donnees: Un ticket, tel que l'API le renvoie.
 
         Returns:
-            The issue.
+            Le ticket.
         """
-        # An issue's body is null when it has none.
-        return cls(title=data["title"], body=data["body"] or "", url=data["html_url"])
+        # Le corps d'un ticket vaut null quand il n'en a pas.
+        return cls(
+            titre=donnees["title"], corps=donnees["body"] or "", url=donnees["html_url"]
+        )
 ```
 
 `src/ghcli/api.py`&nbsp;:
 
 ```python
-"""Calls to the GitHub API."""
+"""Appels à l'API de GitHub."""
 
 import os
 import sys
 
 import niquests
 
-from .model import Issue
+from .modele import Ticket
 
-API_URL = "https://api.github.com"
+URL_API = "https://api.github.com"
 
 
-def _get_token() -> str:
-    token = os.environ.get("GHCLI_TOKEN")
-    if not token:
+def _lit_jeton() -> str:
+    jeton = os.environ.get("GHCLI_TOKEN")
+    if not jeton:
         print(
-            "Unable to read the GitHub token from the GHCLI_TOKEN environment "
-            "variable. Define it and run the program again.",
+            "Impossible de lire le jeton GitHub dans la variable d'environnement "
+            "GHCLI_TOKEN. Définissez-la et relancez le programme.",
             file=sys.stderr,
         )
         sys.exit(1)
-    return token
+    return jeton
 
 
-def _headers(token: str | None) -> dict[str, str]:
-    headers = {"Accept": "application/vnd.github+json"}
-    # Without a token, the API still answers reads of public repositories.
-    if token:
-        headers["Authorization"] = f"Bearer {token}"
-    return headers
+def _entetes(jeton: str | None) -> dict[str, str]:
+    entetes = {"Accept": "application/vnd.github+json"}
+    # Sans jeton, l'API répond tout de même aux lectures des dépôts publics.
+    if jeton:
+        entetes["Authorization"] = f"Bearer {jeton}"
+    return entetes
 
 
-def list_issues(owner: str, repo: str) -> list[Issue]:
-    """List the open issues among the 100 latest of a GitHub repository.
+def liste_tickets(proprietaire: str, depot: str) -> list[Ticket]:
+    """Liste les tickets ouverts parmi les 100 derniers d'un dépôt GitHub.
 
     Args:
-        owner: The repository's owner.
-        repo: The repository's name.
+        proprietaire: Le propriétaire du dépôt.
+        depot: Le nom du dépôt.
 
     Returns:
-        Its issues, without its pull requests.
+        Ses tickets, sans ses pull requests.
     """
     # https://docs.github.com/en/rest/issues/issues#list-repository-issues
-    response = niquests.get(
-        f"{API_URL}/repos/{owner}/{repo}/issues",
+    reponse = niquests.get(
+        f"{URL_API}/repos/{proprietaire}/{depot}/issues",
         params={"per_page": "100"},
-        headers=_headers(os.environ.get("GHCLI_TOKEN")),
+        headers=_entetes(os.environ.get("GHCLI_TOKEN")),
         timeout=10,
     )
-    # An error status (404 for an unknown repository, 401 for a bad token)
-    # raises niquests.HTTPError.
-    response.raise_for_status()
-    # The API counts pull requests as issues.
+    # Un statut d'erreur (404 pour un dépôt inconnu, 401 pour un jeton invalide)
+    # lève niquests.HTTPError.
+    reponse.raise_for_status()
+    # L'API compte les pull requests parmi les tickets.
     return [
-        Issue.from_dict(issue)
-        for issue in response.json()
-        if "pull_request" not in issue
+        Ticket.depuis_dict(ticket)
+        for ticket in reponse.json()
+        if "pull_request" not in ticket
     ]
 
 
-def create_issue(owner: str, repo: str, title: str, body: str) -> Issue:
-    """Create an issue in a GitHub repository.
+def cree_ticket(proprietaire: str, depot: str, titre: str, corps: str) -> Ticket:
+    """Crée un ticket dans un dépôt GitHub.
 
     Args:
-        owner: The repository's owner.
-        repo: The repository's name.
-        title: The issue's title.
-        body: The issue's body.
+        proprietaire: Le propriétaire du dépôt.
+        depot: Le nom du dépôt.
+        titre: Le titre du ticket.
+        corps: Le corps du ticket.
 
     Returns:
-        The created issue.
+        Le ticket créé.
     """
     # https://docs.github.com/en/rest/issues/issues#create-an-issue
-    response = niquests.post(
-        f"{API_URL}/repos/{owner}/{repo}/issues",
-        json={"title": title, "body": body},
-        headers=_headers(_get_token()),
+    reponse = niquests.post(
+        f"{URL_API}/repos/{proprietaire}/{depot}/issues",
+        json={"title": titre, "body": corps},
+        headers=_entetes(_lit_jeton()),
         timeout=10,
     )
-    response.raise_for_status()
-    return Issue.from_dict(response.json())
+    reponse.raise_for_status()
+    return Ticket.depuis_dict(reponse.json())
 ```
 
 `src/ghcli/cli.py`&nbsp;:
 
 ```python
-"""Command-line interface to GitHub issues."""
+"""Interface en ligne de commande pour les tickets GitHub."""
 
 import argparse
 import sys
 
 import niquests
 
-from .api import create_issue, list_issues
-from .model import Issue
+from .api import cree_ticket, liste_tickets
+from .modele import Ticket
 
 
-def _create_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="List and create GitHub issues.")
-    subparsers = parser.add_subparsers(dest="command", required=True)
-    list_parser = subparsers.add_parser("list", help="list a repository's issues")
-    create_parser = subparsers.add_parser("create", help="create an issue")
-    for subparser in (list_parser, create_parser):
-        subparser.add_argument("owner", help="owner of the GitHub repository")
-        subparser.add_argument("repo", help="name of the GitHub repository")
-    create_parser.add_argument("title", help="title of the issue")
-    create_parser.add_argument("body", help="body of the issue")
-    return parser
+def _cree_parseur() -> argparse.ArgumentParser:
+    parseur = argparse.ArgumentParser(description="Liste et crée les tickets GitHub.")
+    sous_parseurs = parseur.add_subparsers(dest="commande", required=True)
+    parseur_liste = sous_parseurs.add_parser(
+        "list", help="liste les tickets d'un dépôt"
+    )
+    parseur_creation = sous_parseurs.add_parser("create", help="crée un ticket")
+    for sous_parseur in (parseur_liste, parseur_creation):
+        sous_parseur.add_argument("proprietaire", help="propriétaire du dépôt GitHub")
+        sous_parseur.add_argument("depot", help="nom du dépôt GitHub")
+    parseur_creation.add_argument("titre", help="titre du ticket")
+    parseur_creation.add_argument("corps", help="corps du ticket")
+    return parseur
 
 
-def _show(issue: Issue) -> None:
-    print(f"{issue.url} - {issue.title} - {issue.body}")
+def _affiche(ticket: Ticket) -> None:
+    print(f"{ticket.url} - {ticket.titre} - {ticket.corps}")
 
 
 def main() -> None:
-    """Run the command the arguments name."""
-    args = _create_parser().parse_args()
+    """Exécute la commande que nomment les arguments."""
+    args = _cree_parseur().parse_args()
     try:
-        if args.command == "list":
-            for issue in list_issues(args.owner, args.repo):
-                _show(issue)
-        elif args.command == "create":
-            _show(create_issue(args.owner, args.repo, args.title, args.body))
-    except niquests.HTTPError as error:
-        print(f"GitHub API error: {error}", file=sys.stderr)
+        if args.commande == "list":
+            for ticket in liste_tickets(args.proprietaire, args.depot):
+                _affiche(ticket)
+        elif args.commande == "create":
+            _affiche(cree_ticket(args.proprietaire, args.depot, args.titre, args.corps))
+    except niquests.HTTPError as erreur:
+        print(f"Erreur de l'API GitHub : {erreur}", file=sys.stderr)
         sys.exit(1)
 ```
 
@@ -813,8 +821,8 @@ uv run ghcli list shuuchuu ghcli
 
 ## Des tests
 
-Écrivez dans `tests/test_api.py` des tests de `_get_token`, `list_issues`,
-`create_issue` et `main`, et lancez-les avec `uv run pytest`. Ils ne doivent dépendre ni
+Écrivez dans `tests/test_api.py` des tests de `_lit_jeton`, `liste_tickets`,
+`cree_ticket` et `main`, et lancez-les avec `uv run pytest`. Ils ne doivent dépendre ni
 du réseau, ni de votre jeton&nbsp;: remplacez `niquests.get` et `niquests.post` par des
 fonctions qui renvoient une fausse réponse, et la variable d'environnement par une
 valeur de test. Vérifiez aussi les cas limites et les cas d'erreur&nbsp;: une variable
@@ -835,38 +843,38 @@ passer.
 <summary>Conseils supplémentaires</summary>
 
 La fixture `monkeypatch` de `pytest` remplace un attribut le temps d'un test
-(`monkeypatch.setattr(niquests, "get", fake_get)`) et définit ou retire une variable
-d'environnement (`setenv`, `delenv`). Une fausse réponse n'a besoin que des méthodes
-qu'appelle le code&nbsp;: `raise_for_status` et `json`. Une fixture `autouse=True`
+(`monkeypatch.setattr(niquests, "get", fausse_lecture)`) et définit ou retire une
+variable d'environnement (`setenv`, `delenv`). Une fausse réponse n'a besoin que des
+méthodes qu'appelle le code&nbsp;: `raise_for_status` et `json`. Une fixture `autouse=True`
 s'applique à tous les tests du module. `main` lit `sys.argv`, que `monkeypatch` remplace
 aussi&nbsp;; la fixture `capsys` donne ce que le code a écrit sur la sortie d'erreur.
 
 ```python
-class FakeResponse:
-    def __init__(self, data, status_code=200):
-        self.data = data
+class FausseReponse:
+    def __init__(self, donnees, statut=200):
+        self.donnees = donnees
         ...
 
     def raise_for_status(self):
-        if self.status_code >= 400:
-            raise niquests.HTTPError(self.status_code)
+        if self.statut >= 400:
+            raise niquests.HTTPError(self.statut)
 
     def json(self):
-        return self.data
+        return self.donnees
 
 
-def test_list_issues(monkeypatch):
-    monkeypatch.setenv("GHCLI_TOKEN", "a-token")
-    monkeypatch.setattr(niquests, "get", lambda url, **kwargs: FakeResponse([...]))
-    assert list_issues("octocat", "sandbox") == [...]
+def test_liste_tickets(monkeypatch):
+    monkeypatch.setenv("GHCLI_TOKEN", "un-jeton")
+    monkeypatch.setattr(niquests, "get", lambda url, **kwargs: FausseReponse([...]))
+    assert liste_tickets("octocat", "sandbox") == [...]
 
 
-def test_main_reports_an_api_error(monkeypatch, capsys):
+def test_main_signale_une_erreur_de_l_api(monkeypatch, capsys):
     monkeypatch.setattr(niquests, "get", ...)
-    monkeypatch.setattr(sys, "argv", ["ghcli", "list", "octocat", "unknown"])
-    with pytest.raises(SystemExit) as exit_info:
+    monkeypatch.setattr(sys, "argv", ["ghcli", "list", "octocat", "inconnu"])
+    with pytest.raises(SystemExit) as info_sortie:
         main()
-    assert exit_info.value.code == ...
+    assert info_sortie.value.code == ...
     assert "404" in capsys.readouterr().err
 ```
 
@@ -884,109 +892,111 @@ from typing import Any
 import niquests
 import pytest
 
-from ghcli.api import _get_token, create_issue, list_issues
+from ghcli.api import _lit_jeton, cree_ticket, liste_tickets
 from ghcli.cli import main
-from ghcli.model import Issue
+from ghcli.modele import Ticket
 
-ISSUE = {
-    "title": "A title",
-    "body": "A body",
+TICKET = {
+    "title": "Un titre",
+    "body": "Un corps",
     "html_url": "https://github.com/octocat/sandbox/issues/1",
 }
 
 
-class FakeResponse:
-    """What `niquests.get` and `niquests.post` return, without the network."""
+class FausseReponse:
+    """Ce que renvoient `niquests.get` et `niquests.post`, sans le réseau."""
 
-    def __init__(self, data: Any, status_code: int = 200) -> None:
-        self.data = data
-        self.status_code = status_code
+    def __init__(self, donnees: Any, statut: int = 200) -> None:
+        self.donnees = donnees
+        self.statut = statut
 
     def raise_for_status(self) -> None:
-        if self.status_code >= 400:
-            raise niquests.HTTPError(self.status_code)
+        if self.statut >= 400:
+            raise niquests.HTTPError(self.statut)
 
     def json(self) -> Any:
-        return self.data
+        return self.donnees
 
 
 @pytest.fixture(autouse=True)
-def token(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setenv("GHCLI_TOKEN", "a-token")
+def jeton(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("GHCLI_TOKEN", "un-jeton")
 
 
-def test_get_token_reads_the_environment() -> None:
-    assert _get_token() == "a-token"
+def test_lit_jeton_lit_l_environnement() -> None:
+    assert _lit_jeton() == "un-jeton"
 
 
-def test_get_token_exits_without_the_variable(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_lit_jeton_quitte_sans_la_variable(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.delenv("GHCLI_TOKEN")
     with pytest.raises(SystemExit):
-        _get_token()
+        _lit_jeton()
 
 
-def test_get_token_exits_on_an_empty_variable(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_lit_jeton_quitte_sur_une_variable_vide(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     monkeypatch.setenv("GHCLI_TOKEN", "")
     with pytest.raises(SystemExit):
-        _get_token()
+        _lit_jeton()
 
 
-def test_list_issues(monkeypatch: pytest.MonkeyPatch) -> None:
-    calls = []
+def test_liste_tickets(monkeypatch: pytest.MonkeyPatch) -> None:
+    appels = []
 
-    def get(url: str, **kwargs: Any) -> FakeResponse:
-        calls.append((url, kwargs["headers"]["Authorization"]))
-        return FakeResponse([ISSUE, {**ISSUE, "pull_request": {}}])
+    def fausse_lecture(url: str, **kwargs: Any) -> FausseReponse:
+        appels.append((url, kwargs["headers"]["Authorization"]))
+        return FausseReponse([TICKET, {**TICKET, "pull_request": {}}])
 
-    monkeypatch.setattr(niquests, "get", get)
-    assert list_issues("octocat", "sandbox") == [
-        Issue("A title", "A body", "https://github.com/octocat/sandbox/issues/1")
+    monkeypatch.setattr(niquests, "get", fausse_lecture)
+    assert liste_tickets("octocat", "sandbox") == [
+        Ticket("Un titre", "Un corps", "https://github.com/octocat/sandbox/issues/1")
     ]
-    assert calls == [
-        ("https://api.github.com/repos/octocat/sandbox/issues", "Bearer a-token")
+    assert appels == [
+        ("https://api.github.com/repos/octocat/sandbox/issues", "Bearer un-jeton")
     ]
 
 
-def test_list_issues_without_a_token(monkeypatch: pytest.MonkeyPatch) -> None:
-    def get(url: str, **kwargs: Any) -> FakeResponse:
+def test_liste_tickets_sans_jeton(monkeypatch: pytest.MonkeyPatch) -> None:
+    def fausse_lecture(url: str, **kwargs: Any) -> FausseReponse:
         assert "Authorization" not in kwargs["headers"]
-        return FakeResponse([])
+        return FausseReponse([])
 
     monkeypatch.delenv("GHCLI_TOKEN")
-    monkeypatch.setattr(niquests, "get", get)
-    assert list_issues("octocat", "sandbox") == []
+    monkeypatch.setattr(niquests, "get", fausse_lecture)
+    assert liste_tickets("octocat", "sandbox") == []
 
 
-def test_list_issues_of_an_unknown_repository(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setattr(niquests, "get", lambda url, **kwargs: FakeResponse({}, 404))
+def test_liste_tickets_d_un_depot_inconnu(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(niquests, "get", lambda url, **kwargs: FausseReponse({}, 404))
     with pytest.raises(niquests.HTTPError):
-        list_issues("octocat", "unknown")
+        liste_tickets("octocat", "inconnu")
 
 
-def test_create_issue(monkeypatch: pytest.MonkeyPatch) -> None:
-    def post(url: str, **kwargs: Any) -> FakeResponse:
-        assert kwargs["json"] == {"title": "A title", "body": "A body"}
-        return FakeResponse(ISSUE, 201)
+def test_cree_ticket(monkeypatch: pytest.MonkeyPatch) -> None:
+    def fausse_ecriture(url: str, **kwargs: Any) -> FausseReponse:
+        assert kwargs["json"] == {"title": "Un titre", "body": "Un corps"}
+        return FausseReponse(TICKET, 201)
 
-    monkeypatch.setattr(niquests, "post", post)
-    issue = create_issue("octocat", "sandbox", "A title", "A body")
-    assert issue.url == "https://github.com/octocat/sandbox/issues/1"
+    monkeypatch.setattr(niquests, "post", fausse_ecriture)
+    ticket = cree_ticket("octocat", "sandbox", "Un titre", "Un corps")
+    assert ticket.url == "https://github.com/octocat/sandbox/issues/1"
 
 
-def test_create_issue_needs_a_token(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_cree_ticket_exige_un_jeton(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.delenv("GHCLI_TOKEN")
     with pytest.raises(SystemExit):
-        create_issue("octocat", "sandbox", "A title", "A body")
+        cree_ticket("octocat", "sandbox", "Un titre", "Un corps")
 
 
-def test_main_reports_an_api_error(
+def test_main_signale_une_erreur_de_l_api(
     monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
 ) -> None:
-    monkeypatch.setattr(niquests, "get", lambda url, **kwargs: FakeResponse({}, 404))
-    monkeypatch.setattr(sys, "argv", ["ghcli", "list", "octocat", "unknown"])
-    with pytest.raises(SystemExit) as exit_info:
+    monkeypatch.setattr(niquests, "get", lambda url, **kwargs: FausseReponse({}, 404))
+    monkeypatch.setattr(sys, "argv", ["ghcli", "list", "octocat", "inconnu"])
+    with pytest.raises(SystemExit) as info_sortie:
         main()
-    assert exit_info.value.code == 1
+    assert info_sortie.value.code == 1
     assert "404" in capsys.readouterr().err
 ```
 
@@ -1012,7 +1022,7 @@ arguments. Ajoutez au projet `typer` et `rich` (`uv add typer rich`), et réécr
   l'API.
 
 Regardez `uv run ghcli --help`, puis `uv run ghcli list shuuchuu ghcli`. Que
-devient `_create_parser`&nbsp;? Que reste-t-il à changer dans `api.py`&nbsp;? Et dans
+devient `_cree_parseur`&nbsp;? Que reste-t-il à changer dans `api.py`&nbsp;? Et dans
 les tests, qui doivent passer sans qu'on y touche&nbsp;?
 
 **Documentation utile**
@@ -1023,7 +1033,7 @@ les tests, qui doivent passer sans qu'on y touche&nbsp;?
 <details>
 <summary>Conseils supplémentaires</summary>
 
-`_create_parser` disparaît&nbsp;: les annotations des fonctions déclarent les arguments.
+`_cree_parseur` disparaît&nbsp;: les annotations des fonctions déclarent les arguments.
 Rien ne change dans `api.py`, et les tests passent tels quels&nbsp;: c'est ce que
 rapporte la séparation entre `cli.py` et `api.py`. `@app.command("list")` nomme la
 commande, ce qui évite d'appeler une fonction `list` comme la fonction native. Un alias
@@ -1043,11 +1053,11 @@ Proprietaire = Annotated[str, typer.Argument(help=...)]
 
 
 @app.command("list")
-def lister(owner: Proprietaire, repo: ...) -> None:
+def lister(proprietaire: Proprietaire, depot: ...) -> None:
     """Liste les tickets ouverts d'un dépôt."""
     tableau = Table("Titre", "Corps")
     tableau.add_column("URL", no_wrap=True)
-    for issue in list_issues(owner, repo):
+    for ticket in liste_tickets(proprietaire, depot):
         tableau.add_row(...)
     console.print(tableau)
 
@@ -1055,7 +1065,7 @@ def lister(owner: Proprietaire, repo: ...) -> None:
 def main() -> None:
     try:
         app()
-    except niquests.HTTPError as error:
+    except niquests.HTTPError as erreur:
         ...
 ```
 
@@ -1067,7 +1077,7 @@ def main() -> None:
 `src/ghcli/cli.py`&nbsp;:
 
 ```python
-"""Command-line interface to GitHub issues."""
+"""Interface en ligne de commande pour les tickets GitHub."""
 
 import sys
 from typing import Annotated
@@ -1077,7 +1087,7 @@ import typer
 from rich.console import Console
 from rich.table import Table
 
-from .api import create_issue, list_issues
+from .api import cree_ticket, liste_tickets
 
 app = typer.Typer(help="Liste et crée les tickets d'un dépôt GitHub.")
 # Sans balises : le titre d'un ticket peut contenir des crochets.
@@ -1088,34 +1098,34 @@ Depot = Annotated[str, typer.Argument(help="Nom du dépôt GitHub.")]
 
 
 @app.command("list")
-def lister(owner: Proprietaire, repo: Depot) -> None:
+def lister(proprietaire: Proprietaire, depot: Depot) -> None:
     """Liste les tickets ouverts d'un dépôt."""
     tableau = Table("Titre", "Corps")
     # Sans retour à la ligne : une URL coupée ne mène plus nulle part.
     tableau.add_column("URL", no_wrap=True)
-    for issue in list_issues(owner, repo):
-        tableau.add_row(issue.title, issue.body, issue.url)
+    for ticket in liste_tickets(proprietaire, depot):
+        tableau.add_row(ticket.titre, ticket.corps, ticket.url)
     console.print(tableau)
 
 
 @app.command("create")
 def creer(
-    owner: Proprietaire,
-    repo: Depot,
-    title: Annotated[str, typer.Argument(help="Titre du ticket.")],
-    body: Annotated[str, typer.Argument(help="Corps du ticket.")],
+    proprietaire: Proprietaire,
+    depot: Depot,
+    titre: Annotated[str, typer.Argument(help="Titre du ticket.")],
+    corps: Annotated[str, typer.Argument(help="Corps du ticket.")],
 ) -> None:
     """Crée un ticket."""
-    issue = create_issue(owner, repo, title, body)
-    console.print(f"{issue.url} - {issue.title} - {issue.body}")
+    ticket = cree_ticket(proprietaire, depot, titre, corps)
+    console.print(f"{ticket.url} - {ticket.titre} - {ticket.corps}")
 
 
 def main() -> None:
-    """Run the command the arguments name."""
+    """Exécute la commande que nomment les arguments."""
     try:
         app()
-    except niquests.HTTPError as error:
-        print(f"GitHub API error: {error}", file=sys.stderr)
+    except niquests.HTTPError as erreur:
+        print(f"Erreur de l'API GitHub : {erreur}", file=sys.stderr)
         sys.exit(1)
 ```
 
@@ -1123,7 +1133,7 @@ def main() -> None:
 uv add typer rich
 uv run ghcli --help
 uv run ghcli list shuuchuu ghcli
-uv run ghcli list shuuchuu no-such-repository || echo "(code de retour non nul)"
+uv run ghcli list shuuchuu depot-inexistant || echo "(code de retour non nul)"
 uv run pytest
 uv run ruff check
 uv run ruff format --check
