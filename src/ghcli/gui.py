@@ -1,4 +1,4 @@
-"""Interface graphique pour les tickets GitHub, avec Tkinter."""
+"""Graphical user interface to GitHub issues, with Tkinter."""
 
 import tkinter as tk
 from pathlib import Path
@@ -6,127 +6,118 @@ from tkinter import filedialog, messagebox, ttk
 
 from niquests import HTTPError
 
-from .api import cree_ticket, liste_tickets
-from .io import enregistre_tickets
+from .api import create_issue, list_issues
+from .io import save_issues_to_file
 
 
-def _ouvre_fenetre(titre: str) -> ttk.Frame:
-    """Ouvre une fenêtre au-dessus de la principale.
-
-    Args:
-        titre: Le titre de la fenêtre.
-
-    Returns:
-        Le cadre de la fenêtre, où placer ses widgets avec `grid`.
-    """
-    fenetre = tk.Toplevel()
-    fenetre.title(titre)
-    cadre = ttk.Frame(fenetre, padding=10)
-    cadre.grid()
-    return cadre
-
-
-def _ajoute_champ(cadre: ttk.Frame, libelle: str, ligne: int) -> ttk.Entry:
-    """Ajoute un champ de saisie avec son libellé sur une ligne d'un cadre.
+def _window(title: str) -> ttk.Frame:
+    """Open a window on top of the main one.
 
     Args:
-        cadre: Le cadre où l'ajouter.
-        libelle: Le texte à sa gauche.
-        ligne: Sa ligne dans la grille du cadre.
+        title: The window's title.
 
     Returns:
-        Le champ, dont `get()` donne le texte saisi.
+        The window's frame, to lay out its widgets in with `grid`.
     """
-    ttk.Label(cadre, text=libelle).grid(
-        row=ligne, column=0, padx=10, pady=5, sticky="w"
-    )
-    champ = ttk.Entry(cadre, width=40)
-    champ.grid(row=ligne, column=1, padx=10, pady=5)
-    return champ
+    window = tk.Toplevel()
+    window.title(title)
+    frame = ttk.Frame(window, padding=10)
+    frame.grid()
+    return frame
 
 
-def _ouvre_fenetre_liste() -> None:
-    """Ouvre la fenêtre qui enregistre les tickets d'un dépôt dans un fichier JSON."""
-    cadre = _ouvre_fenetre("Lister les tickets")
-    proprietaire = _ajoute_champ(cadre, "Propriétaire :", 0)
-    depot = _ajoute_champ(cadre, "Dépôt :", 1)
-    sortie = _ajoute_champ(cadre, "Fichier de sortie :", 2)
+def _entry(frame: ttk.Frame, label: str, row: int) -> ttk.Entry:
+    """Add a labeled entry on a row of a frame.
 
-    def parcourt() -> None:
-        chemin = filedialog.asksaveasfilename(
-            defaultextension=".json", filetypes=[("Fichiers JSON", "*.json")]
+    Args:
+        frame: The frame to add it to.
+        label: The text on its left.
+        row: Its row in the frame's grid.
+
+    Returns:
+        The entry, whose `get()` gives the text typed in.
+    """
+    ttk.Label(frame, text=label).grid(row=row, column=0, padx=10, pady=5, sticky="w")
+    entry = ttk.Entry(frame, width=40)
+    entry.grid(row=row, column=1, padx=10, pady=5)
+    return entry
+
+
+def _open_list_window() -> None:
+    """Open the window that saves a repository's issues to a JSON file."""
+    frame = _window("List issues")
+    owner = _entry(frame, "Owner:", 0)
+    repo = _entry(frame, "Repository:", 1)
+    output = _entry(frame, "Output file:", 2)
+
+    def browse() -> None:
+        path = filedialog.asksaveasfilename(
+            defaultextension=".json", filetypes=[("JSON files", "*.json")]
         )
-        # Une chaîne vide quand on annule la boîte de dialogue.
-        if chemin:
-            sortie.delete(0, tk.END)
-            sortie.insert(0, chemin)
+        # An empty string when the dialog is cancelled.
+        if path:
+            output.delete(0, tk.END)
+            output.insert(0, path)
 
-    def enregistre() -> None:
-        if not (proprietaire.get() and depot.get() and sortie.get()):
+    def save() -> None:
+        if not (owner.get() and repo.get() and output.get()):
             messagebox.showerror(
-                "Erreur",
-                "Renseignez le propriétaire, le dépôt et le fichier de sortie.",
+                "Error", "Fill in the owner, the repository and the output file."
             )
             return
         try:
-            tickets = liste_tickets(proprietaire.get(), depot.get())
-        except HTTPError as erreur:
-            messagebox.showerror(
-                "Erreur", f"Impossible de lister les tickets : {erreur}"
-            )
+            issues = list_issues(owner.get(), repo.get())
+        except HTTPError as error:
+            messagebox.showerror("Error", f"Could not list the issues: {error}")
             return
-        enregistre_tickets(tickets, Path(sortie.get()))
-        messagebox.showinfo(
-            "Enregistré", f"{len(tickets)} ticket(s) enregistré(s) dans {sortie.get()}"
-        )
+        save_issues_to_file(issues, Path(output.get()))
+        messagebox.showinfo("Saved", f"{len(issues)} issue(s) saved to {output.get()}")
 
-    ttk.Button(cadre, text="Parcourir…", command=parcourt).grid(
-        row=2, column=2, padx=10
-    )
-    ttk.Button(cadre, text="Enregistrer les tickets", command=enregistre).grid(
+    ttk.Button(frame, text="Browse…", command=browse).grid(row=2, column=2, padx=10)
+    ttk.Button(frame, text="Save the issues", command=save).grid(
         row=3, column=1, pady=10
     )
 
 
-def _ouvre_fenetre_creation() -> None:
-    """Ouvre la fenêtre qui crée un ticket."""
-    cadre = _ouvre_fenetre("Créer un ticket")
-    proprietaire = _ajoute_champ(cadre, "Propriétaire :", 0)
-    depot = _ajoute_champ(cadre, "Dépôt :", 1)
-    titre = _ajoute_champ(cadre, "Titre :", 2)
-    ttk.Label(cadre, text="Corps :").grid(row=3, column=0, padx=10, pady=5, sticky="nw")
-    corps = tk.Text(cadre, width=40, height=10)
-    corps.grid(row=3, column=1, padx=10, pady=5)
+def _open_create_window() -> None:
+    """Open the window that creates an issue."""
+    frame = _window("Create an issue")
+    owner = _entry(frame, "Owner:", 0)
+    repo = _entry(frame, "Repository:", 1)
+    title = _entry(frame, "Title:", 2)
+    ttk.Label(frame, text="Body:").grid(row=3, column=0, padx=10, pady=5, sticky="nw")
+    body = tk.Text(frame, width=40, height=10)
+    body.grid(row=3, column=1, padx=10, pady=5)
 
-    def cree() -> None:
-        # Le contenu d'un Text va du premier caractère de sa première ligne ("1.0") à
-        # sa fin, retour à la ligne compris.
-        texte = corps.get("1.0", tk.END).strip()
-        if not (proprietaire.get() and depot.get() and titre.get() and texte):
-            messagebox.showerror("Erreur", "Renseignez tous les champs.")
+    def create() -> None:
+        # A Text's content runs from its first line's first character ("1.0") to
+        # its end, a newline included.
+        text = body.get("1.0", tk.END).strip()
+        if not (owner.get() and repo.get() and title.get() and text):
+            messagebox.showerror("Error", "Fill in every field.")
             return
         try:
-            ticket = cree_ticket(proprietaire.get(), depot.get(), titre.get(), texte)
-        except HTTPError as erreur:
-            messagebox.showerror("Erreur", f"Impossible de créer le ticket : {erreur}")
+            issue = create_issue(owner.get(), repo.get(), title.get(), text)
+        except HTTPError as error:
+            messagebox.showerror("Error", f"Could not create the issue: {error}")
             return
-        messagebox.showinfo("Créé", f"Ticket créé : {ticket.url}")
+        messagebox.showinfo("Created", f"Issue created: {issue.url}")
 
-    ttk.Button(cadre, text="Créer le ticket", command=cree).grid(
+    ttk.Button(frame, text="Create the issue", command=create).grid(
         row=4, column=1, pady=10
     )
 
 
-def cree_interface() -> None:
-    """Ouvre la fenêtre principale, dont les boutons ouvrent les autres."""
-    racine = tk.Tk()
-    racine.title("ghcli")
-    cadre = ttk.Frame(racine, padding=10)
-    cadre.grid()
-    ttk.Button(cadre, text="Lister les tickets", command=_ouvre_fenetre_liste).grid(
+def create_gui() -> None:
+    """Open the main window, whose buttons open the others."""
+    root = tk.Tk()
+    root.title("ghcli")
+    frame = ttk.Frame(root, padding=10)
+    frame.grid()
+    ttk.Button(frame, text="List issues", command=_open_list_window).grid(
         row=0, column=0, padx=20, pady=10
     )
-    ttk.Button(cadre, text="Créer un ticket", command=_ouvre_fenetre_creation).grid(
+    ttk.Button(frame, text="Create an issue", command=_open_create_window).grid(
         row=1, column=0, padx=20, pady=10
     )
-    racine.mainloop()
+    root.mainloop()

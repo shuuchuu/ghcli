@@ -6,8 +6,7 @@
     "dockerfile": "Dockerfile"
   },
   // Features to add to the dev container. More info: https://containers.dev/features.
-  // Un bureau, affiché dans le navigateur sur le port 6080, où s'ouvrent les fenêtres de
-  // Tkinter.
+  // A desktop, shown in the browser on port 6080, where Tkinter's windows open.
   "features": {
     "ghcr.io/devcontainers/features/desktop-lite:1": {
       "password": "noPassword"

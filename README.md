@@ -1,94 +1,91 @@
-# Interface graphique Tkinter pour GitHub Issues
+# Tkinter graphical interface for GitHub Issues
 
-*[English version](https://github.com/shuuchuu/ghcli/tree/gui-en)*
+*[Version française](https://github.com/shuuchuu/ghcli/tree/gui)*
 
-Le projet des travaux pratiques *Interface graphique Tkinter pour GitHub Issues*. Ils
-partent de la solution des travaux pratiques [*Interface en ligne de commande pour
-GitHub Issues*](https://github.com/shuuchuu/ghcli)&nbsp;: `ghcli list` et `ghcli
-create` listent et créent les tickets d'un dépôt, et sont testés. Nous allons leur
-ajouter une interface graphique, avec Tkinter. Leur énoncé est ci-dessous, pour les
-faire dans un Codespace GitHub ou un clone local (Colab n'affiche pas de fenêtres).
+The project of the *Tkinter graphical interface for GitHub Issues* lab. It starts from
+the solution of the [*Command-line interface for GitHub
+Issues*](https://github.com/shuuchuu/ghcli/tree/main-en) lab: `ghcli list` and `ghcli
+create` list and create a repository's issues, and are tested. We are going to add a
+graphical interface to them, with Tkinter. Its instructions are below, to run the lab in
+a GitHub Codespace or a local clone (Colab shows no windows).
 
-Le projet contient pour cela&nbsp;:
+For that, the project holds:
 
-- `src/ghcli/gui.py`, l'interface à compléter&nbsp;: `cree_interface` ouvre la fenêtre
-  principale, dont les deux boutons ouvrent chacun une fenêtre, vide pour l'instant.
-  `_ouvre_fenetre` ouvre une fenêtre et renvoie le cadre où placer ses widgets,
-  `_ajoute_champ` ajoute à un cadre une ligne de formulaire, un libellé et une zone de
-  saisie&nbsp;;
-- `src/ghcli/io.py`, dont `enregistre_tickets` enregistre des tickets dans un fichier
-  JSON&nbsp;;
-- la commande `ghcli gui`, qui lance l'interface.
+- `src/ghcli/gui.py`, the interface to complete: `create_gui` opens the main window,
+  whose two buttons each open a window, empty for now. `_window` opens a window and
+  returns the frame to lay out its widgets in, `_entry` adds a form row to a frame, a
+  label and an entry;
+- `src/ghcli/io.py`, whose `save_issues_to_file` saves issues to a JSON file;
+- the `ghcli gui` command, which starts the interface.
 
-## Mise en place de l'environnement de travail
+## Setting up the working environment
 
-Ouvrez le dépôt dans un Codespace, sur sa branche `gui`&nbsp;: sur GitHub, sur la
-branche `gui`, **Code** > **Codespaces** > **Create codespace on gui**, ou [ce
-lien](https://codespaces.new/shuuchuu/ghcli/tree/gui). Le Codespace installe les
-dépendances à sa création, dans le `.venv` du projet, et un bureau, où s'affichent
-les fenêtres&nbsp;: dans l'onglet **Ports**, à côté du terminal, survolez la ligne du
-port 6080 (*Bureau / Desktop*), cliquez sur l'icône du globe (**Open in Browser**),
-puis sur **Connect**.
+This English version of the lab is the repository's `gui-en` branch. Open it in a
+Codespace: on GitHub, on the `gui-en` branch, **Code** > **Codespaces** > **Create
+codespace on gui-en**, or [this
+link](https://codespaces.new/shuuchuu/ghcli/tree/gui-en). The Codespace installs the
+dependencies when it is created, in the project's `.venv`, and a desktop, where the
+windows show: in the **Ports** tab, next to the terminal, hover over the line of port
+6080 (*Bureau / Desktop*), click the globe icon (**Open in Browser**), then
+**Connect**.
 
-Dans un clone local de cette branche (`git clone -b gui
-https://github.com/shuuchuu/ghcli.git`), installez
-[uv](https://docs.astral.sh/uv/getting-started/installation/), puis lancez `uv sync` à
-la racine du dépôt&nbsp;: le Python que `uv` installe contient Tkinter.
+In a local clone of that branch (`git clone -b gui-en
+https://github.com/shuuchuu/ghcli.git`), install
+[uv](https://docs.astral.sh/uv/getting-started/installation/), then run `uv sync` at the
+root of the repository: the Python `uv` installs includes Tkinter.
 
-`ghcli` a besoin d'un jeton GitHub&nbsp;: si vous n'en avez pas, créez un dépôt de test
-et un jeton comme l'explique [l'énoncé de l'interface en ligne de
-commande](https://github.com/shuuchuu/ghcli#un-dépôt-de-test-et-un-jeton-github), et
-mettez-le dans un fichier `creds.env` à la racine du dépôt. Les commandes se lancent
-dans un terminal à la racine du dépôt (**Terminal** > **Nouveau terminal** dans le
-Codespace), après `source creds.env`. Lancez l'interface avec `uv run ghcli gui`, et
-fermez-la (la fenêtre principale) avant de la relancer après une modification. Les
-solutions sont sur la [branche
-`gui-solution`](https://github.com/shuuchuu/ghcli/tree/gui-solution) du dépôt.
+`ghcli` needs a GitHub token: if you don't have one, create a test repository and a
+token as [the command-line interface's
+instructions](https://github.com/shuuchuu/ghcli/tree/main-en#a-test-repository-and-a-github-token)
+explain, and put it in a `creds.env` file at the root of the repository. The commands
+run in a terminal at the root of the repository (**Terminal** > **New Terminal** in the
+Codespace), after `source creds.env`. Start the interface with `uv run ghcli gui`, and
+close it (the main window) before starting it again after a change. The solutions are
+on the repository's [`gui-solution-en`
+branch](https://github.com/shuuchuu/ghcli/tree/gui-solution-en).
 
-## Enregistrer les tickets d'un dépôt
+## Saving a repository's issues
 
-Écrivez `_ouvre_fenetre_liste`, qui ouvre la fenêtre *Lister les tickets*&nbsp;: trois zones
-de saisie, le propriétaire du dépôt, son nom et le fichier où enregistrer ses tickets,
-un bouton *Parcourir…* qui choisit ce fichier dans une boîte de dialogue, et un bouton
-*Enregistrer les tickets*. Celui-ci liste les tickets du dépôt (`liste_tickets`), les
-enregistre dans le fichier (`enregistre_tickets`), puis l'annonce dans une boîte de
-dialogue. Une zone vide, ou une erreur de l'API, s'annonce dans une boîte de dialogue
-d'erreur.
+Write `_open_list_window`, which opens the *List issues* window: three entries, the
+repository's owner, its name and the file to save its issues to, a *Browse…* button
+that picks that file in a dialog, and a *Save the issues* button. The latter lists the
+repository's issues (`list_issues`), saves them to the file (`save_issues_to_file`),
+then says so in a dialog. An empty entry, or an error of the API, is reported in an
+error dialog.
 
-**Documentation utile**
+**Useful documentation**
 
-- https://docs.python.org/fr/3/library/dialog.html#tkinter.filedialog.asksaveasfilename
-- https://docs.python.org/fr/3/library/tkinter.messagebox.html
+- https://docs.python.org/3/library/dialog.html#tkinter.filedialog.asksaveasfilename
+- https://docs.python.org/3/library/tkinter.messagebox.html
 
 <details>
-<summary>Conseils supplémentaires</summary>
+<summary>Additional hints</summary>
 
-`_ajoute_champ(cadre, "Propriétaire :", 0)` place une zone de saisie sur la première
-ligne du cadre, et la renvoie&nbsp;: `champ.get()` donne son texte, `champ.delete(0, tk.END)`
-le vide et `champ.insert(0, texte)` l'écrit. Les fonctions des boutons se définissent
-dans `_ouvre_fenetre_liste`, où elles voient ses zones de saisie. `asksaveasfilename`
-renvoie le chemin choisi, ou une chaîne vide si l'on annule. `liste_tickets` lève une
-`niquests.HTTPError` pour un dépôt inconnu.
+`_entry(frame, "Owner:", 0)` puts an entry on the frame's first row, and returns it:
+`entry.get()` gives its text, `entry.delete(0, tk.END)` clears it and `entry.insert(0,
+text)` writes it. The buttons' functions are defined inside `_open_list_window`, where
+they see its entries. `asksaveasfilename` returns the chosen path, or an empty string
+when cancelled. `list_issues` raises a `niquests.HTTPError` for an unknown repository.
 
 ```python
-def _ouvre_fenetre_liste() -> None:
-    cadre = _ouvre_fenetre("Lister les tickets")
-    proprietaire = _ajoute_champ(cadre, "Propriétaire :", 0)
+def _open_list_window() -> None:
+    frame = _window("List issues")
+    owner = _entry(frame, "Owner:", 0)
     ...
 
-    def parcourt() -> None:
-        chemin = filedialog.asksaveasfilename(defaultextension=".json")
+    def browse() -> None:
+        path = filedialog.asksaveasfilename(defaultextension=".json")
         ...
 
-    def enregistre() -> None:
+    def save() -> None:
         try:
-            tickets = liste_tickets(proprietaire.get(), depot.get())
-        except HTTPError as erreur:
-            messagebox.showerror("Erreur", ...)
+            issues = list_issues(owner.get(), repo.get())
+        except HTTPError as error:
+            messagebox.showerror("Error", ...)
             return
         ...
 
-    ttk.Button(cadre, text="Parcourir…", command=parcourt).grid(row=2, column=2)
+    ttk.Button(frame, text="Browse…", command=browse).grid(row=2, column=2)
     ...
 ```
 
@@ -97,10 +94,10 @@ def _ouvre_fenetre_liste() -> None:
 <details>
 <summary>Solution</summary>
 
-`src/ghcli/gui.py`, avec ses imports&nbsp;:
+`src/ghcli/gui.py`, with its imports:
 
 ```python
-"""Interface graphique pour les tickets GitHub, avec Tkinter."""
+"""Graphical user interface to GitHub issues, with Tkinter."""
 
 import tkinter as tk
 from pathlib import Path
@@ -108,87 +105,80 @@ from tkinter import filedialog, messagebox, ttk
 
 from niquests import HTTPError
 
-from .api import cree_ticket, liste_tickets
-from .io import enregistre_tickets
+from .api import create_issue, list_issues
+from .io import save_issues_to_file
 ```
 
 ```python
-def _ouvre_fenetre_liste() -> None:
-    """Ouvre la fenêtre qui enregistre les tickets d'un dépôt dans un fichier JSON."""
-    cadre = _ouvre_fenetre("Lister les tickets")
-    proprietaire = _ajoute_champ(cadre, "Propriétaire :", 0)
-    depot = _ajoute_champ(cadre, "Dépôt :", 1)
-    sortie = _ajoute_champ(cadre, "Fichier de sortie :", 2)
+def _open_list_window() -> None:
+    """Open the window that saves a repository's issues to a JSON file."""
+    frame = _window("List issues")
+    owner = _entry(frame, "Owner:", 0)
+    repo = _entry(frame, "Repository:", 1)
+    output = _entry(frame, "Output file:", 2)
 
-    def parcourt() -> None:
-        chemin = filedialog.asksaveasfilename(
-            defaultextension=".json", filetypes=[("Fichiers JSON", "*.json")]
+    def browse() -> None:
+        path = filedialog.asksaveasfilename(
+            defaultextension=".json", filetypes=[("JSON files", "*.json")]
         )
-        # Une chaîne vide quand on annule la boîte de dialogue.
-        if chemin:
-            sortie.delete(0, tk.END)
-            sortie.insert(0, chemin)
+        # An empty string when the dialog is cancelled.
+        if path:
+            output.delete(0, tk.END)
+            output.insert(0, path)
 
-    def enregistre() -> None:
-        if not (proprietaire.get() and depot.get() and sortie.get()):
+    def save() -> None:
+        if not (owner.get() and repo.get() and output.get()):
             messagebox.showerror(
-                "Erreur",
-                "Renseignez le propriétaire, le dépôt et le fichier de sortie.",
+                "Error", "Fill in the owner, the repository and the output file."
             )
             return
         try:
-            tickets = liste_tickets(proprietaire.get(), depot.get())
-        except HTTPError as erreur:
-            messagebox.showerror(
-                "Erreur", f"Impossible de lister les tickets : {erreur}"
-            )
+            issues = list_issues(owner.get(), repo.get())
+        except HTTPError as error:
+            messagebox.showerror("Error", f"Could not list the issues: {error}")
             return
-        enregistre_tickets(tickets, Path(sortie.get()))
-        messagebox.showinfo(
-            "Enregistré", f"{len(tickets)} ticket(s) enregistré(s) dans {sortie.get()}"
-        )
+        save_issues_to_file(issues, Path(output.get()))
+        messagebox.showinfo("Saved", f"{len(issues)} issue(s) saved to {output.get()}")
 
-    ttk.Button(cadre, text="Parcourir…", command=parcourt).grid(
-        row=2, column=2, padx=10
-    )
-    ttk.Button(cadre, text="Enregistrer les tickets", command=enregistre).grid(
+    ttk.Button(frame, text="Browse…", command=browse).grid(row=2, column=2, padx=10)
+    ttk.Button(frame, text="Save the issues", command=save).grid(
         row=3, column=1, pady=10
     )
 ```
 
 </details>
 
-## Créer un ticket
+## Creating an issue
 
-Écrivez `_ouvre_fenetre_creation`, qui ouvre la fenêtre *Créer un ticket*&nbsp;: le
-propriétaire du dépôt, son nom et le titre du ticket dans des zones de saisie, son
-corps dans une zone de texte de plusieurs lignes, et un bouton *Créer le ticket* qui
-crée le ticket (`cree_ticket`), puis donne son URL dans une boîte de dialogue. Créez
-un ticket dans votre dépôt de test, puis enregistrez ses tickets avec l'autre fenêtre.
+Write `_open_create_window`, which opens the *Create an issue* window: the repository's
+owner, its name and the issue's title in entries, its body in a multi-line text area,
+and a *Create the issue* button that creates the issue (`create_issue`), then gives its
+URL in a dialog. Create an issue in your test repository, then save its issues with the
+other window.
 
-**Documentation utile**
+**Useful documentation**
 
 - https://tkdocs.com/tutorial/text.html
 
 <details>
-<summary>Conseils supplémentaires</summary>
+<summary>Additional hints</summary>
 
-`tk.Text(cadre, width=40, height=10)` est une zone de texte de plusieurs lignes, qui se
-place avec `grid` comme les autres widgets. `corps.get("1.0", tk.END)` donne son
-contenu, de son premier caractère (ligne 1, colonne 0) à sa fin, qui comprend un retour
-à la ligne final&nbsp;: `strip()` l'enlève.
+`tk.Text(frame, width=40, height=10)` is a multi-line text area, laid out with `grid`
+like the other widgets. `text.get("1.0", tk.END)` gives its content, from its first
+character (line 1, column 0) to its end, which includes a final newline: `strip()`
+removes it.
 
 ```python
-def _ouvre_fenetre_creation() -> None:
-    cadre = _ouvre_fenetre("Créer un ticket")
+def _open_create_window() -> None:
+    frame = _window("Create an issue")
     ...
-    corps = tk.Text(cadre, width=40, height=10)
-    corps.grid(row=3, column=1, padx=10, pady=5)
+    body = tk.Text(frame, width=40, height=10)
+    body.grid(row=3, column=1, padx=10, pady=5)
 
-    def cree() -> None:
-        texte = corps.get("1.0", tk.END).strip()
+    def create() -> None:
+        text = body.get("1.0", tk.END).strip()
         ...
-        messagebox.showinfo("Créé", f"Ticket créé : {ticket.url}")
+        messagebox.showinfo("Created", f"Issue created: {issue.url}")
 
     ...
 ```
@@ -198,34 +188,34 @@ def _ouvre_fenetre_creation() -> None:
 <details>
 <summary>Solution</summary>
 
-`src/ghcli/gui.py`&nbsp;:
+`src/ghcli/gui.py`:
 
 ```python
-def _ouvre_fenetre_creation() -> None:
-    """Ouvre la fenêtre qui crée un ticket."""
-    cadre = _ouvre_fenetre("Créer un ticket")
-    proprietaire = _ajoute_champ(cadre, "Propriétaire :", 0)
-    depot = _ajoute_champ(cadre, "Dépôt :", 1)
-    titre = _ajoute_champ(cadre, "Titre :", 2)
-    ttk.Label(cadre, text="Corps :").grid(row=3, column=0, padx=10, pady=5, sticky="nw")
-    corps = tk.Text(cadre, width=40, height=10)
-    corps.grid(row=3, column=1, padx=10, pady=5)
+def _open_create_window() -> None:
+    """Open the window that creates an issue."""
+    frame = _window("Create an issue")
+    owner = _entry(frame, "Owner:", 0)
+    repo = _entry(frame, "Repository:", 1)
+    title = _entry(frame, "Title:", 2)
+    ttk.Label(frame, text="Body:").grid(row=3, column=0, padx=10, pady=5, sticky="nw")
+    body = tk.Text(frame, width=40, height=10)
+    body.grid(row=3, column=1, padx=10, pady=5)
 
-    def cree() -> None:
-        # Le contenu d'un Text va du premier caractère de sa première ligne ("1.0") à
-        # sa fin, retour à la ligne compris.
-        texte = corps.get("1.0", tk.END).strip()
-        if not (proprietaire.get() and depot.get() and titre.get() and texte):
-            messagebox.showerror("Erreur", "Renseignez tous les champs.")
+    def create() -> None:
+        # A Text's content runs from its first line's first character ("1.0") to
+        # its end, a newline included.
+        text = body.get("1.0", tk.END).strip()
+        if not (owner.get() and repo.get() and title.get() and text):
+            messagebox.showerror("Error", "Fill in every field.")
             return
         try:
-            ticket = cree_ticket(proprietaire.get(), depot.get(), titre.get(), texte)
-        except HTTPError as erreur:
-            messagebox.showerror("Erreur", f"Impossible de créer le ticket : {erreur}")
+            issue = create_issue(owner.get(), repo.get(), title.get(), text)
+        except HTTPError as error:
+            messagebox.showerror("Error", f"Could not create the issue: {error}")
             return
-        messagebox.showinfo("Créé", f"Ticket créé : {ticket.url}")
+        messagebox.showinfo("Created", f"Issue created: {issue.url}")
 
-    ttk.Button(cadre, text="Créer le ticket", command=cree).grid(
+    ttk.Button(frame, text="Create the issue", command=create).grid(
         row=4, column=1, pady=10
     )
 ```
