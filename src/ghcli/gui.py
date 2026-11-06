@@ -1,39 +1,39 @@
-"""Interface web pour les tickets GitHub, avec Gradio."""
+"""Web interface to GitHub issues, with Gradio."""
 
 import gradio as gr
 
-from .modele import Ticket
+from .model import Issue
 
 
-def _formate_ticket(ticket: Ticket) -> str:
-    """Montre un ticket en Markdown : son titre, lié à sa page, puis son corps.
+def _format_issue(issue: Issue) -> str:
+    """Show an issue in Markdown: its title, linked to its page, then its body.
 
     Args:
-        ticket: Le ticket à montrer.
+        issue: The issue to show.
 
     Returns:
-        Son Markdown.
+        Its Markdown.
     """
-    return f"### [{ticket.titre}]({ticket.url})\n\n{ticket.corps}"
+    return f"### [{issue.title}]({issue.url})\n\n{issue.body}"
 
 
-def construit_app() -> gr.Blocks:
-    """Construit l'application : un onglet liste les tickets, un autre en crée un.
+def build_app() -> gr.Blocks:
+    """Build the interface: a tab lists a repository's issues, another creates one.
 
     Returns:
-        L'application, que `launch()` sert.
+        The app, which `launch()` serves.
     """
     with gr.Blocks(title="ghcli") as app:
-        gr.Markdown("# ghcli\n\nListe et crée les tickets d'un dépôt GitHub.")
-        with gr.Tab("Lister les tickets"):
-            # Votre code ici
+        gr.Markdown("# ghcli\n\nList and create the issues of a GitHub repository.")
+        with gr.Tab("List issues"):
+            # Your code here
             ...
-        with gr.Tab("Créer un ticket"):
-            # Votre code ici
+        with gr.Tab("Create an issue"):
+            # Your code here
             ...
     return app
 
 
-def cree_interface() -> None:
-    """Sert l'interface, à l'adresse http://127.0.0.1:7860 par défaut."""
-    construit_app().launch()
+def create_gui() -> None:
+    """Serve the interface, at http://127.0.0.1:7860 by default."""
+    build_app().launch()
