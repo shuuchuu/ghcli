@@ -1,71 +1,71 @@
-"""Interface web pour les tickets GitHub, avec Gradio."""
+"""Web interface to GitHub issues, with Gradio."""
 
 import gradio as gr
 from niquests import HTTPError
 
-from .api import cree_ticket, liste_tickets
-from .modele import Ticket
+from .api import create_issue, list_issues
+from .model import Issue
 
 
-def _formate_ticket(ticket: Ticket) -> str:
-    """Montre un ticket en Markdown : son titre, lié à sa page, puis son corps.
+def _format_issue(issue: Issue) -> str:
+    """Show an issue in Markdown: its title, linked to its page, then its body.
 
     Args:
-        ticket: Le ticket à montrer.
+        issue: The issue to show.
 
     Returns:
-        Son Markdown.
+        Its Markdown.
     """
-    return f"### [{ticket.titre}]({ticket.url})\n\n{ticket.corps}"
+    return f"### [{issue.title}]({issue.url})\n\n{issue.body}"
 
 
-def _liste_tickets(proprietaire: str, depot: str) -> str:
+def _list_issues(owner: str, repo: str) -> str:
     try:
-        tickets = liste_tickets(proprietaire, depot)
-    except HTTPError as erreur:
-        return f"Impossible de lister les tickets : {erreur}"
-    return "\n\n---\n\n".join(map(_formate_ticket, tickets)) or "Aucun ticket."
+        issues = list_issues(owner, repo)
+    except HTTPError as error:
+        return f"Could not list the issues: {error}"
+    return "\n\n---\n\n".join(map(_format_issue, issues)) or "No issue."
 
 
-def _cree_ticket(proprietaire: str, depot: str, titre: str, corps: str) -> str:
+def _create_issue(owner: str, repo: str, title: str, body: str) -> str:
     try:
-        ticket = cree_ticket(proprietaire, depot, titre, corps)
-    except HTTPError as erreur:
-        return f"Impossible de créer le ticket : {erreur}"
-    return _formate_ticket(ticket)
+        issue = create_issue(owner, repo, title, body)
+    except HTTPError as error:
+        return f"Could not create the issue: {error}"
+    return _format_issue(issue)
 
 
-def construit_app() -> gr.Blocks:
-    """Construit l'application : un onglet liste les tickets, un autre en crée un.
+def build_app() -> gr.Blocks:
+    """Build the interface: a tab lists a repository's issues, another creates one.
 
     Returns:
-        L'application, que `launch()` sert.
+        The app, which `launch()` serves.
     """
     with gr.Blocks(title="ghcli") as app:
-        gr.Markdown("# ghcli\n\nListe et crée les tickets d'un dépôt GitHub.")
-        with gr.Tab("Lister les tickets"):
+        gr.Markdown("# ghcli\n\nList and create the issues of a GitHub repository.")
+        with gr.Tab("List issues"):
             with gr.Row():
-                proprietaire = gr.Textbox(label="Propriétaire", placeholder="octocat")
-                depot = gr.Textbox(label="Dépôt", placeholder="Hello-World")
-            bouton = gr.Button("Afficher les tickets")
-            tickets = gr.Markdown()
-            # Les arguments de la fonction sont les valeurs des entrées, sa valeur de
-            # retour celle de la sortie.
-            bouton.click(_liste_tickets, inputs=[proprietaire, depot], outputs=tickets)
-        with gr.Tab("Créer un ticket"):
+                owner = gr.Textbox(label="Owner", placeholder="octocat")
+                repo = gr.Textbox(label="Repository", placeholder="Hello-World")
+            button = gr.Button("List the issues")
+            issues = gr.Markdown()
+            # The function's arguments are the inputs' values, its return value
+            # the output's.
+            button.click(_list_issues, inputs=[owner, repo], outputs=issues)
+        with gr.Tab("Create an issue"):
             with gr.Row():
-                proprietaire = gr.Textbox(label="Propriétaire")
-                depot = gr.Textbox(label="Dépôt")
-            titre = gr.Textbox(label="Titre")
-            corps = gr.Textbox(label="Corps", lines=6)
-            bouton = gr.Button("Créer le ticket")
-            ticket = gr.Markdown()
-            bouton.click(
-                _cree_ticket, inputs=[proprietaire, depot, titre, corps], outputs=ticket
+                owner = gr.Textbox(label="Owner")
+                repo = gr.Textbox(label="Repository")
+            title = gr.Textbox(label="Title")
+            body = gr.Textbox(label="Body", lines=6)
+            button = gr.Button("Create the issue")
+            issue = gr.Markdown()
+            button.click(
+                _create_issue, inputs=[owner, repo, title, body], outputs=issue
             )
     return app
 
 
-def cree_interface() -> None:
-    """Sert l'interface, à l'adresse http://127.0.0.1:7860 par défaut."""
-    construit_app().launch()
+def create_gui() -> None:
+    """Serve the interface, at http://127.0.0.1:7860 by default."""
+    build_app().launch()
