@@ -14,7 +14,10 @@ Le but de ces travaux pratiques est de mettre en pratique les principes d'ingén
 durant la formation&nbsp;: nous allons créer `ghcli`, une interface en ligne de commande
 qui liste et crée les tickets (*issues*) d'un dépôt GitHub, d'abord avec `argparse`,
 puis avec `Typer` et `Rich`. Sa publication sur Test PyPI est un prolongement
-facultatif. Le dépôt est un projet `uv` dont le paquet, `src/ghcli/`, est encore vide.
+facultatif. L'étape « Des tests » suppose `pytest` et `monkeypatch`&nbsp;: si votre
+formation ne les a pas présentés, passez-la&nbsp;; à l'étape « `Typer` et `Rich` »,
+lancez alors seulement `ruff` et `pyrefly`. Le dépôt est un projet `uv` dont le paquet,
+`src/ghcli/`, est encore vide.
 
 ## Mise en place de l'environnement de travail
 
@@ -254,9 +257,9 @@ Essayez&nbsp;: `uv run ghcli shuuchuu ghcli` affiche trois tickets, dont un sans
 corps, et pas la *pull request* de ce dépôt&nbsp;:
 
 ```text
-https://github.com/shuuchuu/ghcli/issues/… - Ticket 3 - Corps / Body
-https://github.com/shuuchuu/ghcli/issues/… - Ticket 2 -
-https://github.com/shuuchuu/ghcli/issues/… - Ticket 1 - Corps / Body
+https://github.com/shuuchuu/ghcli/issues/88 - Ticket 3 - Corps / Body
+https://github.com/shuuchuu/ghcli/issues/87 - Ticket 2 -
+https://github.com/shuuchuu/ghcli/issues/86 - Ticket 1 - Corps / Body
 ```
 
 Votre dépôt de test n'a pas encore de ticket&nbsp;: `uv run ghcli <votre utilisateur>
