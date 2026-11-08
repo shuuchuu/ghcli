@@ -2,7 +2,11 @@
 authors = [
   {name = "m09", email = "142691+m09@users.noreply.github.com"},
 ]
-dependencies = []
+dependencies = [
+  "niquests >= 3.21, < 4",
+  "rich >= 15, < 16",
+  "typer >= 0.27, < 1",
+]
 description = "CLI to list and create GitHub issues."
 license = "Apache-2.0"
 license-files = ["LICENSE"]
@@ -22,6 +26,9 @@ dev = [
   "ruff >= 0.17",
 ]
 
+[project.scripts]
+ghcli = "ghcli.cli:main"
+
 [tool.ruff]
 target-version = "py313"
 
@@ -37,6 +44,16 @@ select = ["A", "B", "C", "D", "DOC", "E", "EM", "F", "I", "N", "PIE", "PTH", "RE
 
 [tool.ruff.lint.pydocstyle]
 convention = "google"
+
+[tool.uv.build-backend]
+# Publié sous le nom ghcli-<utilisateur GitHub>, importé sous le nom ghcli.
+module-name = "ghcli"
+
+[[tool.uv.index]]
+name = "testpypi"
+url = "https://test.pypi.org/simple/"
+publish-url = "https://test.pypi.org/legacy/"
+explicit = true
 
 # Without a config, pyrefly falls back to its lenient "basic" preset. With one,
 # it stops treating the project root as an import root, so tests couldn't
