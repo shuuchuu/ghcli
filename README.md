@@ -66,7 +66,9 @@ Dans un bloc `with gr.Tab(...)`, chaque composant créé s'ajoute à l'onglet, e
 gr.Row():` en place plusieurs côte à côte. `bouton.click(fonction, inputs=[...],
 outputs=...)` appelle la fonction avec les valeurs des composants d'entrée, et affiche
 ce qu'elle renvoie dans celui de sortie. `liste_tickets` lève une `niquests.HTTPError`
-pour un dépôt inconnu.
+pour un dépôt inconnu. Sur `octocat` / `Hello-World`, un dépôt public que l'API lit sans
+jeton, la zone affiche une suite de titres liés, séparés par des lignes&nbsp;; sur un
+dépôt inconnu, `Impossible de lister les tickets : 404 Client Error: Not Found…`.
 
 ```python
 def _liste_tickets(proprietaire: str, depot: str) -> str:
@@ -96,6 +98,8 @@ with gr.Tab("Lister les tickets"):
 
 ```python
 """Interface web pour les tickets GitHub, avec Gradio."""
+
+import os
 
 import gradio as gr
 from niquests import HTTPError
@@ -134,18 +138,25 @@ with gr.Tab("Lister les tickets"):
 Dans l'onglet *Créer un ticket*, ajoutez le propriétaire du dépôt, son nom, le titre du
 ticket et son corps (une zone de texte de plusieurs lignes), un bouton *Créer le
 ticket* et une zone de Markdown qui affiche le ticket créé, ou un message d'erreur. Le
-bouton appelle une fonction `_cree_ticket`, à écrire. Créez un ticket dans votre dépôt
-de test, puis listez ses tickets dans l'autre onglet.
+bouton appelle une fonction `_cree_ticket`, à écrire. Sans jeton (`GHCLI_TOKEN` vide),
+elle renvoie un message qui le dit, sans appeler `cree_ticket`, qui arrêterait alors
+tout le programme&nbsp;: c'est ce qu'on attend d'une ligne de commande, pas d'une
+interface. Créez un ticket dans votre dépôt de test, puis listez ses tickets dans
+l'autre onglet.
 
 <details>
 <summary>Conseils supplémentaires</summary>
 
-`gr.Textbox(label="Corps", lines=6)` est une zone de texte de six lignes. Les deux
-onglets peuvent réutiliser les mêmes noms de variables&nbsp;: chaque `click` reçoit les
-composants qui existent à son appel.
+`gr.Textbox(label="Corps", lines=6)` est une zone de texte de six lignes.
+`os.environ.get("GHCLI_TOKEN")` vaut `None` ou `""` sans jeton (`import os` en tête de
+`gui.py`). Les deux onglets peuvent réutiliser les mêmes noms de variables&nbsp;: chaque
+`click` reçoit les composants qui existent à son appel. Avec un jeton, le ticket créé
+s'affiche, et l'autre onglet le liste&nbsp;; sans jeton, le message de `_cree_ticket`.
 
 ```python
 def _cree_ticket(proprietaire: str, depot: str, titre: str, corps: str) -> str:
+    if not os.environ.get("GHCLI_TOKEN"):
+        return ...
     try:
         ticket = cree_ticket(proprietaire, depot, titre, corps)
     except HTTPError as erreur:
@@ -162,6 +173,11 @@ def _cree_ticket(proprietaire: str, depot: str, titre: str, corps: str) -> str:
 
 ```python
 def _cree_ticket(proprietaire: str, depot: str, titre: str, corps: str) -> str:
+    if not os.environ.get("GHCLI_TOKEN"):
+        return (
+            "Impossible de créer le ticket sans jeton GitHub : définissez la variable "
+            "d'environnement GHCLI_TOKEN."
+        )
     try:
         ticket = cree_ticket(proprietaire, depot, titre, corps)
     except HTTPError as erreur:
