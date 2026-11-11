@@ -102,6 +102,7 @@ def _ouvre_fenetre_liste() -> None:
 ```python
 """Interface graphique pour les tickets GitHub, avec Tkinter."""
 
+import os
 import tkinter as tk
 from pathlib import Path
 from tkinter import filedialog, messagebox, ttk
@@ -217,6 +218,14 @@ def _ouvre_fenetre_creation() -> None:
         texte = corps.get("1.0", tk.END).strip()
         if not (proprietaire.get() and depot.get() and titre.get() and texte):
             messagebox.showerror("Erreur", "Renseignez tous les champs.")
+            return
+        # Sans jeton, cree_ticket arrête le programme, et la fenêtre avec lui.
+        if not os.environ.get("GHCLI_TOKEN"):
+            messagebox.showerror(
+                "Erreur",
+                "Impossible de créer le ticket sans jeton GitHub : définissez la "
+                "variable d'environnement GHCLI_TOKEN.",
+            )
             return
         try:
             ticket = cree_ticket(proprietaire.get(), depot.get(), titre.get(), texte)
