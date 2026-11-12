@@ -14,9 +14,10 @@ Le projet contient pour cela&nbsp;:
 
 - `src/ghcli/gui.py`, l'application à compléter&nbsp;: `interface` en décrit l'interface
   (deux zones de texte, `proprietaire` et `depot`, un bouton, `recupere`, et deux
-  sorties, `nombre` et `graphique`), `serveur` en calculera les sorties,
-  `cree_interface` la sert, et `_convertit_en_html` transforme une figure Plotly en HTML
-  qu'affiche une sortie&nbsp;;
+  sorties, `nombre` et `graphique`) et charge dans l'en-tête de la page le JavaScript
+  de Plotly, `serveur` en calculera les sorties, `cree_interface` la sert, et
+  `_convertit_en_html` transforme une figure Plotly en HTML qu'affiche une
+  sortie&nbsp;;
 - dans `src/ghcli/modele.py`, la date de création de chaque ticket,
   `Ticket.date_creation`&nbsp;;
 - la commande `ghcli gui`, qui lance l'application.
@@ -102,6 +103,7 @@ from typing import TYPE_CHECKING
 
 import plotly.graph_objects as go
 from niquests import HTTPError
+from plotly.offline import get_plotlyjs_version
 from shiny import App, Inputs, Outputs, Session, reactive, render, run_app, ui
 
 from .api import liste_tickets
